@@ -80,7 +80,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .write(&char, &message, btleplug::api::WriteType::WithResponse)
                 .await?;
 
-            time::sleep(Duration::from_millis(50)).await;
+            //time::sleep(Duration::from_millis(1)).await;
         }
     }
 
