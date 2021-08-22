@@ -67,7 +67,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let char = chars.iter().find(|c| c.uuid == ourchar).expect("mskekg");
 
     loop {
-        let vm = vec![160, 320, 640, 800, 1000, 1600, 3200];
+        let vm = vec![640];
         for i in vm {
             let message = blackmagic_camera_control::Message::create_message(
                 255,
