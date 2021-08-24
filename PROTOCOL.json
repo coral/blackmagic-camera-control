@@ -1,0 +1,1017 @@
+{
+	"information": {
+		"readme": "This serves as a machine-readable specification for the Blackmagic camera protocol. If any BM devs end up reading this, please provide something like this in the future, this isn't 1995 anymore ffs.",
+		"source": "https://github.com/coral/blackmagic-camera-protocol",
+		"git": "https://github.com/coral/blackmagic-camera-protocol.git"
+	},
+	"groups": [
+		{
+			"name": "Lens",
+			"normalized_name": "lens",
+			"id": 0,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Lens",
+					"group_id": 0,
+					"parameter": "Focus",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "0.0 = near, 1.0 = far"
+				},
+				{
+					"id": 1,
+					"group": "Lens",
+					"group_id": 0,
+					"parameter": "Instantaneous autofocus",
+					"type": "void",
+					"index": [],
+					"interpretation": "trigger instantaneous autofocus"
+				},
+				{
+					"id": 2,
+					"group": "Lens",
+					"group_id": 0,
+					"parameter": "Aperture (f-stop)",
+					"type": "fixed16",
+					"index": [],
+					"minimum": -1,
+					"maximum": 16,
+					"interpretation": "Aperture Value (where fnumber\n= sqrt(2^AV))"
+				},
+				{
+					"id": 3,
+					"group": "Lens",
+					"group_id": 0,
+					"parameter": "Aperture (normalised)",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "0.0 = smallest, 1.0 = largest"
+				},
+				{
+					"id": 4,
+					"group": "Lens",
+					"group_id": 0,
+					"parameter": "Aperture (ordinal)",
+					"type": "int16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 256,
+					"interpretation": "Steps through available aperture values from minimum (0) to maximum (n)"
+				},
+				{
+					"id": 5,
+					"group": "Lens",
+					"group_id": 0,
+					"parameter": "Instantaneous auto aperture",
+					"type": "void",
+					"index": [],
+					"interpretation": "trigger instantaneous auto aperture"
+				},
+				{
+					"id": 6,
+					"group": "Lens",
+					"group_id": 0,
+					"parameter": "Optical image stabilisation",
+					"type": "boolean",
+					"index": [],
+					"interpretation": "true = enabled, false = disabled"
+				},
+				{
+					"id": 7,
+					"group": "Lens",
+					"group_id": 0,
+					"parameter": "Set absolute zoom (mm)",
+					"type": "int16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 4000,
+					"interpretation": "Move to specified focal length in mm, from minimum (0) to maximum (max)"
+				},
+				{
+					"id": 8,
+					"group": "Lens",
+					"group_id": 0,
+					"parameter": "Set absolute zoom (normalised)",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "Move to specified focal length:\n0.0 = wide, 1.0 = tele"
+				},
+				{
+					"id": 9,
+					"group": "Lens",
+					"group_id": 0,
+					"parameter": "Set continuous zoom (speed)",
+					"type": "fixed16",
+					"index": [],
+					"minimum": -1,
+					"maximum": 1,
+					"interpretation": "Start/stop zooming at specified rate: -1.0 = zoom wider fast, 0.0\n= stop,\n+1 = zoom tele fast"
+				}
+			]
+		},
+		{
+			"name": "Video",
+			"normalized_name": "video",
+			"id": 1,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Video mode",
+					"type": "int8",
+					"index": [
+						"frame rate",
+						"M-rate",
+						"dimensions",
+						"interlaced",
+						"Color space"
+					],
+					"interpretation": "0 = YUV"
+				},
+				{
+					"id": 1,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Gain (up to Camera 4.9)",
+					"type": "int8",
+					"index": [],
+					"minimum": 1,
+					"maximum": 128,
+					"interpretation": "1x, 2x, 4x, 8x, 16x, 32x, 64x, 128x\ngain"
+				},
+				{
+					"id": 2,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Manual White Balance",
+					"type": "int16",
+					"index": ["color temp", "tint"],
+					"minimum": -50,
+					"maximum": 50,
+					"interpretation": "tint"
+				},
+				{
+					"id": 3,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Set auto WB",
+					"type": "void",
+					"index": [],
+					"interpretation": "Calculate and set auto white balance"
+				},
+				{
+					"id": 4,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Restore auto WB",
+					"type": "void",
+					"index": [],
+					"interpretation": "Use latest auto white balance setting"
+				},
+				{
+					"id": 5,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Exposure (us)",
+					"type": "int32",
+					"index": [],
+					"minimum": 1,
+					"maximum": 42000,
+					"interpretation": "time in us"
+				},
+				{
+					"id": 6,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Exposure (ordinal)",
+					"type": "int16",
+					"index": [],
+					"minimum": 0,
+					"maximum": null,
+					"interpretation": "Steps through available exposure values from minimum\n(0) to maximum (n)"
+				},
+				{
+					"id": 7,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Dynamic Range Mode",
+					"type": "int8",
+					"index": [],
+					"minimum": 0,
+					"maximum": 2,
+					"interpretation": "0 = film, 1 = video,  2 = extended video"
+				},
+				{
+					"id": 8,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Video sharpening level",
+					"type": "int8",
+					"index": [],
+					"minimum": 0,
+					"maximum": 3,
+					"interpretation": "0 = off, 1 = low, 2 = medium,\n3 = high"
+				},
+				{
+					"id": 9,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Recording format",
+					"type": "int16",
+					"index": [
+						"file frame rate",
+						"sensor frame rate",
+						"frame width",
+						"frame height",
+						"flags"
+					],
+					"interpretation": "[4] = windowed mode"
+				},
+				{
+					"id": 10,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Set auto exposure mode",
+					"type": "int8",
+					"index": [],
+					"minimum": 0,
+					"maximum": 4,
+					"interpretation": "0 = Manual Trigger, 1 = Iris,\n2 = Shutter, 3 = Iris + Shutter, 4 = Shutter + Iris"
+				},
+				{
+					"id": 11,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Shutter angle",
+					"type": "int32",
+					"index": [],
+					"minimum": 100,
+					"maximum": 36000,
+					"interpretation": "Shutter angle in degrees, multiplied by 100"
+				},
+				{
+					"id": 12,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Shutter speed",
+					"type": "int32",
+					"index": [],
+					"minimum": 1,
+					"maximum": 5000,
+					"interpretation": "Shutter speed value as a fraction of 1, so 50 for 1/50th of a second"
+				},
+				{
+					"id": 13,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Gain",
+					"type": "int8",
+					"index": [],
+					"minimum": -128,
+					"maximum": 127,
+					"interpretation": "Gain in decibel (dB)"
+				},
+				{
+					"id": 14,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "ISO",
+					"type": "int32",
+					"index": [],
+					"minimum": 0,
+					"maximum": 2147483647,
+					"interpretation": "ISO value"
+				},
+				{
+					"id": 15,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "Display LUT",
+					"type": "int8",
+					"index": ["selected LUT", "enabled or not"],
+					"interpretation": "0 = Not enabled, 1 = Enabled"
+				},
+				{
+					"id": 16,
+					"group": "Video",
+					"group_id": 1,
+					"parameter": "ND Filter",
+					"type": "fixed16",
+					"index": ["stops"],
+					"minimum": 0,
+					"maximum": 16,
+					"interpretation": "f-stop of ND filter to use"
+				}
+			]
+		},
+		{
+			"name": "Audio",
+			"normalized_name": "audio",
+			"id": 2,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Audio",
+					"group_id": 2,
+					"parameter": "Mic level",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "0.0 = minimum, 1.0 = maximum"
+				},
+				{
+					"id": 1,
+					"group": "Audio",
+					"group_id": 2,
+					"parameter": "Headphone level",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0.1,
+					"maximum": 1,
+					"interpretation": "0.0 = minimum, 1.0 = maximum"
+				},
+				{
+					"id": 2,
+					"group": "Audio",
+					"group_id": 2,
+					"parameter": "Headphone program mix",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0.1,
+					"maximum": 1,
+					"interpretation": "0.0 = minimum, 1.0 = maximum"
+				},
+				{
+					"id": 3,
+					"group": "Audio",
+					"group_id": 2,
+					"parameter": "Speaker level",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0.1,
+					"maximum": 1,
+					"interpretation": "0.0 = minimum, 1.0 = maximum"
+				},
+				{
+					"id": 4,
+					"group": "Audio",
+					"group_id": 2,
+					"parameter": "Input type",
+					"type": "int8",
+					"index": [],
+					"minimum": 0,
+					"maximum": 3,
+					"interpretation": "0 = internal mic,\n1 = line level input,\n2 = low mic level input, 3 = high mic level input"
+				},
+				{
+					"id": 5,
+					"group": "Audio",
+					"group_id": 2,
+					"parameter": "Input levels",
+					"type": "fixed16",
+					"index": ["ch0", "ch1"],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "0.0 = minimum, 1.0 = maximum"
+				},
+				{
+					"id": 6,
+					"group": "Audio",
+					"group_id": 2,
+					"parameter": "Phantom power",
+					"type": "boolean",
+					"index": [],
+					"interpretation": "true = powered, false = not powered"
+				}
+			]
+		},
+		{
+			"name": "Output",
+			"normalized_name": "output",
+			"id": 3,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Output",
+					"group_id": 3,
+					"parameter": "Overlay enables",
+					"type": "uint16_bit_field",
+					"index": [],
+					"interpretation": "bit flags:\n[0] = display status,\n[1] = display frame guides\nSome cameras don't allow separate control of frame guides and status overlays."
+				},
+				{
+					"id": 1,
+					"group": "Output",
+					"group_id": 3,
+					"parameter": "Frame guides style (Camera 3.x)",
+					"type": "int8",
+					"index": [],
+					"minimum": 0,
+					"maximum": 8,
+					"interpretation": "0 = HDTV, 1 = 4:3, 2 = 2.4:1,\n3 = 2.39:1, 4 = 2.35:1,\n5 = 1.85:1, 6 = thirds"
+				},
+				{
+					"id": 2,
+					"group": "Output",
+					"group_id": 3,
+					"parameter": "Frame guides opacity (Camera 3.x)",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0.1,
+					"maximum": 1,
+					"interpretation": "0.0 = transparent, 1.0 = opaque"
+				},
+				{
+					"id": 3,
+					"group": "Output",
+					"group_id": 3,
+					"parameter": "Overlays (replaces .1 and .2 above from Cameras 4.0)",
+					"type": "int8",
+					"index": [
+						"frame guides style",
+						"frame guide opacity",
+						"safe area percentage",
+						"grid style"
+					],
+					"interpretation": "bit flags:\n[0] = display thirds,\n[1] = display cross hairs,\n[2] = display center dot,\n[3] = display horizon",
+					"minimum": 0,
+					"maximum": 100
+				}
+			]
+		},
+		{
+			"name": "Display",
+			"normalized_name": "display",
+			"id": 4,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Display",
+					"group_id": 4,
+					"parameter": "Brightness",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "0.0 = minimum, 1.0 = maximum"
+				},
+				{
+					"id": 1,
+					"group": "Display",
+					"group_id": 4,
+					"parameter": "Exposure and focus tools",
+					"type": "int16_bit_field",
+					"index": [
+						"0x1 = zebra,\n0x2 = focus assist, 0x4 = false color"
+					],
+					"interpretation": "0 = disable, 1 = enable"
+				},
+				{
+					"id": 2,
+					"group": "Display",
+					"group_id": 4,
+					"parameter": "Zebra level",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "0.0 = minimum, 1.0 = maximum"
+				},
+				{
+					"id": 3,
+					"group": "Display",
+					"group_id": 4,
+					"parameter": "Peaking level",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "0.0 = minimum, 1.0 = maximum"
+				},
+				{
+					"id": 4,
+					"group": "Display",
+					"group_id": 4,
+					"parameter": "Color bar enable",
+					"type": "int8",
+					"index": [],
+					"minimum": 0,
+					"maximum": 30,
+					"interpretation": "0 = disable bars,\n1-30 = enable bars with timeout (seconds)"
+				},
+				{
+					"id": 5,
+					"group": "Display",
+					"group_id": 4,
+					"parameter": "Focus Assist",
+					"type": "int8",
+					"index": ["focus assist method", "focus line color"],
+					"interpretation": "0 = Red,\n1 = Green,\n2 = Blue,\n3 = White,\n4 = Black"
+				},
+				{
+					"id": 6,
+					"group": "Display",
+					"group_id": 4,
+					"parameter": "Program return feed enable",
+					"type": "int8",
+					"index": [],
+					"minimum": 0,
+					"maximum": 30,
+					"interpretation": "0 = disable, 1-30 = enable with timeout (seconds)"
+				}
+			]
+		},
+		{
+			"name": "Tally",
+			"normalized_name": "tally",
+			"id": 5,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Tally",
+					"group_id": 5,
+					"parameter": "Tally brightness",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "Sets the tally front and tally rear brightness to the same level.\n0.0 = minimum,\n1.0 = maximum"
+				},
+				{
+					"id": 1,
+					"group": "Tally",
+					"group_id": 5,
+					"parameter": "Front tally brightness",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "Sets the tally front brightness.\n0.0 = minimum,\n1.0 = maximum"
+				},
+				{
+					"id": 2,
+					"group": "Tally",
+					"group_id": 5,
+					"parameter": "Rear tally brightness",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "Sets the tally rear brightness.\n0.0 = minimum,\n1.0 = maximum\nTally rear brightness cannot be turned off"
+				}
+			]
+		},
+		{
+			"name": "Reference",
+			"normalized_name": "reference",
+			"id": 6,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Reference",
+					"group_id": 6,
+					"parameter": "Source",
+					"type": "int8",
+					"index": [],
+					"minimum": 0,
+					"maximum": 2,
+					"interpretation": "0 = internal,\n1 = program,\n2 = external"
+				},
+				{
+					"id": 1,
+					"group": "Reference",
+					"group_id": 6,
+					"parameter": "Offset",
+					"type": "int32",
+					"index": [],
+					"interpretation": "+/- offset in pixels"
+				}
+			]
+		},
+		{
+			"name": "Configuration",
+			"normalized_name": "configuration",
+			"id": 7,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Configuration",
+					"group_id": 7,
+					"parameter": "Real Time Clock",
+					"type": "int32",
+					"index": ["time", "date"],
+					"interpretation": "BCD - YYYYMMDD"
+				},
+				{
+					"id": 1,
+					"group": "Configuration",
+					"group_id": 7,
+					"parameter": "System language",
+					"type": "string",
+					"index": ["[0-1]"],
+					"interpretation": "ISO-639-1 two character language code"
+				},
+				{
+					"id": 2,
+					"group": "Configuration",
+					"group_id": 7,
+					"parameter": "Timezone",
+					"type": "int32",
+					"index": [],
+					"interpretation": "Minutes offset from UTC"
+				},
+				{
+					"id": 3,
+					"group": "Configuration",
+					"group_id": 7,
+					"parameter": "Location",
+					"type": "int64",
+					"index": ["latitude", "longitude"],
+					"interpretation": "BCD - sDDDdddddddddddd where s is the sign: 0 = west (-), 1 = east (+); DDD degrees, dddddddddddd decimal degrees"
+				}
+			]
+		},
+		{
+			"name": "Color Correction",
+			"normalized_name": "color_correction",
+			"id": 8,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Color Correction",
+					"group_id": 8,
+					"parameter": "Lift Adjust",
+					"type": "fixed16",
+					"index": ["red", "green", "blue", "luma"],
+					"minimum": -2,
+					"maximum": 2,
+					"interpretation": "default 0.0"
+				},
+				{
+					"id": 1,
+					"group": "Color Correction",
+					"group_id": 8,
+					"parameter": "Gamma Adjust",
+					"type": "fixed16",
+					"index": ["red", "green", "blue", "luma"],
+					"minimum": -4,
+					"maximum": 4,
+					"interpretation": "default 0.0"
+				},
+				{
+					"id": 2,
+					"group": "Color Correction",
+					"group_id": 8,
+					"parameter": "Gain Adjust",
+					"type": "fixed16",
+					"index": ["red", "green", "blue", "luma"],
+					"minimum": 0,
+					"maximum": 16,
+					"interpretation": "default 1.0"
+				},
+				{
+					"id": 3,
+					"group": "Color Correction",
+					"group_id": 8,
+					"parameter": "Offset Adjust",
+					"type": "fixed16",
+					"index": ["red", "green", "blue", "luma"],
+					"minimum": -8,
+					"maximum": 8,
+					"interpretation": "default 0.0"
+				},
+				{
+					"id": 4,
+					"group": "Color Correction",
+					"group_id": 8,
+					"parameter": "Contrast Adjust",
+					"type": "fixed16",
+					"index": ["pivot", "adj"],
+					"minimum": 0,
+					"maximum": 2,
+					"interpretation": "default 1.0"
+				},
+				{
+					"id": 5,
+					"group": "Color Correction",
+					"group_id": 8,
+					"parameter": "Luma mix",
+					"type": "fixed16",
+					"index": [],
+					"minimum": 0,
+					"maximum": 1,
+					"interpretation": "default 1.0"
+				},
+				{
+					"id": 6,
+					"group": "Color Correction",
+					"group_id": 8,
+					"parameter": "Color Adjust",
+					"type": "fixed16",
+					"index": ["hue", "sat"],
+					"minimum": 0,
+					"maximum": 2,
+					"interpretation": "default 1.0"
+				},
+				{
+					"id": 7,
+					"group": "Color Correction",
+					"group_id": 8,
+					"parameter": "Correction Reset Default",
+					"type": "void",
+					"index": [],
+					"interpretation": "reset to defaults"
+				}
+			]
+		},
+		{
+			"name": "Media",
+			"normalized_name": "media",
+			"id": 10,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Media",
+					"group_id": 10,
+					"parameter": "Codec",
+					"type": "int8",
+					"index": ["basic codec", "code variant"],
+					"interpretation": "Blackmagic RAW: 0 = Q0,\n1 = Q5,\n2 = 3:1,\n3 = 5:1,\n4 = 8:1,\n5 = 12:1"
+				},
+				{
+					"id": 1,
+					"group": "Media",
+					"group_id": 10,
+					"parameter": "Transport mode",
+					"type": "int8",
+					"index": [
+						"mode",
+						"speed",
+						"flags",
+						"slot 1 storage medium",
+						"slot 2 storage medium"
+					],
+					"interpretation": "0 = CFast card, 1 = SD Card,\n2 = SSD Recorder,\n3 = USB"
+				},
+				{
+					"id": 2,
+					"group": "Media",
+					"group_id": 10,
+					"parameter": "Playback Control",
+					"type": "int8",
+					"index": ["clip"],
+					"interpretation": "0 = Previous,\n1 = Next"
+				},
+				{
+					"id": 3,
+					"group": "Media",
+					"group_id": 10,
+					"parameter": "Still Capture",
+					"type": "void",
+					"index": [],
+					"interpretation": "Capture"
+				}
+			]
+		},
+		{
+			"name": "PTZ Control",
+			"normalized_name": "ptz_control",
+			"id": 11,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "PTZ Control",
+					"group_id": 11,
+					"parameter": "Pan/Tilt Velocity",
+					"type": "fixed16",
+					"index": ["pan velocity", "tilt velocity"],
+					"minimum": -1,
+					"maximum": 1,
+					"interpretation": "-1.0 = full speed down,\n1.0 = full speed up"
+				},
+				{
+					"id": 1,
+					"group": "PTZ Control",
+					"group_id": 11,
+					"parameter": "Memory Preset",
+					"type": "int8",
+					"index": ["preset command", "=\npreset slot"],
+					"interpretation": "0 = reset,\n1 = store location, 2 = recall location",
+					"minimum": 0,
+					"maximum": 5
+				}
+			]
+		},
+		{
+			"name": "Metadata",
+			"normalized_name": "metadata",
+			"id": 12,
+			"parameters": [
+				{
+					"id": 0,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Reel",
+					"type": "int16",
+					"index": ["reel"],
+					"minimum": 0,
+					"maximum": 999
+				},
+				{
+					"id": 1,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Scene Tags",
+					"type": "int8",
+					"index": [
+						"scene tags",
+						"interior / exterior",
+						"day / night"
+					],
+					"interpretation": "0 = Night\n1 = Day"
+				},
+				{
+					"id": 2,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Scene",
+					"type": "string",
+					"index": ["[0-4] = scene"]
+				},
+				{
+					"id": 3,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Take",
+					"type": "int8",
+					"index": ["take number", "take tags"],
+					"minimum": 1,
+					"maximum": 99,
+					"interpretation": "1 = None\n0 = PU\n1 = VFX\n2 = SER"
+				},
+				{
+					"id": 4,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Good Take",
+					"type": "void",
+					"index": ["good take"]
+				},
+				{
+					"id": 5,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Camera ID",
+					"type": "string",
+					"index": ["[0-28] = ID"]
+				},
+				{
+					"id": 6,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Camera Operator",
+					"type": "string",
+					"index": ["[0-28] = operator"]
+				},
+				{
+					"id": 7,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Director",
+					"type": "string",
+					"index": ["[0-27] = director"]
+				},
+				{
+					"id": 8,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Project Name",
+					"type": "string",
+					"index": ["[0-28] = project"]
+				},
+				{
+					"id": 9,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Lens Type",
+					"type": "string",
+					"index": ["[0-55] = type"]
+				},
+				{
+					"id": 10,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Lens Iris",
+					"type": "string",
+					"index": ["[0-19] = iris"]
+				},
+				{
+					"id": 11,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Lens Focal Length",
+					"type": "string",
+					"index": ["[0-29] = focal length"]
+				},
+				{
+					"id": 12,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Lens Distance",
+					"type": "string",
+					"index": ["[0-49] = distance"]
+				},
+				{
+					"id": 13,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Lens Filter",
+					"type": "string",
+					"index": ["[0-29] = filter"]
+				},
+				{
+					"id": 14,
+					"group": "Metadata",
+					"group_id": 12,
+					"parameter": "Slate Mode",
+					"type": "int8",
+					"index": ["type"],
+					"interpretation": "0 = Recording\n1 = Playback"
+				}
+			]
+		}
+	],
+	"bluetooth_services": [
+		{
+			"name": "Device Information Service",
+			"normalized_name": "device_information_service",
+			"uuid": "180a",
+			"characteristics": [
+				{
+					"name": "Camera Manufacturer",
+					"normalized_name": "camera_manufacturer",
+					"uuid": "2a29",
+					"description": "Read the name of the manufacturer (always “Blackmagic Design”)"
+				},
+				{
+					"name": "Camera Model",
+					"normalized_name": "camera_model",
+					"uuid": "2a24",
+					"description": "Read the name of the camera model (eg. “URSA Mini Pro”)"
+				}
+			]
+		},
+		{
+			"name": "Blackmagic Camera Service",
+			"normalized_name": "blackmagic_camera_service",
+			"uuid": "291d567a-6d75-11e6-8b77-86f30ca893d3",
+			"characteristics": [
+				{
+					"name": "Outgoing Camera Control",
+					"normalized_name": "outgoing_camera_control",
+					"uuid": "5dd3465f-1aee-4299-8493-d2eca2f8e1bb",
+					"description": "Send Camera Control messages"
+				},
+				{
+					"name": "Incoming Camera Control",
+					"normalized_name": "incoming_camera_control",
+					"uuid": "b864e140-76a0-416a-bf30-5876504537d9",
+					"description": "Request notifications for this characteristic to receive Camera Control messages from the camera"
+				},
+				{
+					"name": "Timecode",
+					"normalized_name": "timecode",
+					"uuid": "6d8f2110-86f1-41bf-9afb-451d87e976c8",
+					"description": "Timecode (HH:MM:SS:mm) is represented by a 32-bit BCD number: (eg. 09:12:53:10 = 0x09125310)"
+				},
+				{
+					"name": "Camera Status",
+					"normalized_name": "camera_status",
+					"uuid": "7fe8691d-95dc-4fc5-8abd-ca74339b51b9",
+					"decription": "Request notifications for this characteristic to receive camera status updates.\n\nThe camera status is represented by flags contained in an 8-bit integer:\nNone = 0x00\nCamera Power On = 0x01\nConnected = 0x02\nPaired = 0x04\nVersions Verified = 0x08\nInitial Payload Received = 0x10\nCamera Ready = 0x20"
+				},
+				{
+					"name": "Device Name",
+					"normalized_name": "device_name",
+					"uuid": "ffac0c52-c9fb-41a0-b063-cc76282eb89c",
+					"decription": "Send a device name to the camera (max. 32 characters). The camera will display this name in the Bluetooth Setup Menu"
+				},
+				{
+					"name": "Protocol Version",
+					"normalized_name": "protocol_version",
+					"uuid": "8f1fd018-b508-456f-8f82-3d392bee2706",
+					"description": "Read this value to determine the camera’s supported CCU protocol version"
+				}
+			]
+		}
+	]
+}

@@ -1,8 +1,7 @@
-use crate::error::CameraControlError;
+use crate::error::BluetoothCameraError;
 use btleplug::api::{Central, Characteristic, Manager as _, Peripheral as _};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::stream::StreamExt;
-use std::error::Error;
 use std::time::Duration;
 use tokio::time;
 use uuid::Uuid;
@@ -26,16 +25,15 @@ pub struct BluetoothCamera {
 }
 
 impl BluetoothCamera {
-    pub async fn new(name: String) -> Result<BluetoothCamera, Box<dyn Error>> {
+    pub async fn new(name: String) -> Result<BluetoothCamera, BluetoothCameraError> {
         let bluetooth_manager = Manager::new().await?;
 
-        let adapter = bluetooth_manager
-            .adapters()
-            .await
-            .expect("Unable to fetch adapter list.")
+        let adapter = bluetooth_manager.adapters().await?;
+
+        let adapter = adapter
             .into_iter()
             .nth(0)
-            .expect("Unable to find adapters.");
+            .ok_or(BluetoothCameraError::NoBluetooth)?;
 
         Ok(BluetoothCamera {
             name,
@@ -53,7 +51,7 @@ impl BluetoothCamera {
         })
     }
 
-    pub async fn connect(&mut self, timeout: Duration) -> Result<(), Box<dyn Error>> {
+    pub async fn connect(&mut self, timeout: Duration) -> Result<(), BluetoothCameraError> {
         let now = time::Instant::now();
         self.adapter.start_scan().await?;
 
@@ -78,27 +76,22 @@ impl BluetoothCamera {
                     let device = self.device.as_ref().unwrap();
 
                     //Seed the characteristics list.
-                    match device.discover_characteristics().await {
-                        Ok(v) => {
-                            self.characteristics = v;
-                        }
-                        Err(e) => return Err(Box::new(e)),
-                    }
+                    self.characteristics = device.discover_characteristics().await?;
 
                     //Subscribe to Incoming Camera Control
-                    match self.get_characteristic(self.incoming_camera_uuid).await {
-                        Some(characteristic) => {
-                            device.subscribe(characteristic).await?;
-                            let mut stream = device.notifications().await?;
+                    let characteristic = self
+                        .get_characteristic(self.incoming_camera_uuid)
+                        .await
+                        .ok_or(BluetoothCameraError::NoCharacteristic)?;
 
-                            tokio::spawn(async move {
-                                while let Some(data) = stream.next().await {
-                                    dbg!(data);
-                                }
-                            });
+                    device.subscribe(characteristic).await?;
+                    let mut stream = device.notifications().await?;
+
+                    tokio::spawn(async move {
+                        while let Some(data) = stream.next().await {
+                            dbg!(data);
                         }
-                        None => {}
-                    }
+                    });
 
                     return Ok(());
                 }
