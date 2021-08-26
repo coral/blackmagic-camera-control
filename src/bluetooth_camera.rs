@@ -1,4 +1,5 @@
 use crate::error::BluetoothCameraError;
+use crate::protocol::BlackmagicCameraProtocol;
 use btleplug::api::{Central, Characteristic, Manager as _, Peripheral as _};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::stream::StreamExt;
@@ -26,6 +27,8 @@ pub struct BluetoothCamera {
 
 impl BluetoothCamera {
     pub async fn new(name: String) -> Result<BluetoothCamera, BluetoothCameraError> {
+        let protocol = BlackmagicCameraProtocol::new()?;
+
         let bluetooth_manager = Manager::new().await?;
 
         let adapter = bluetooth_manager.adapters().await?;
@@ -42,12 +45,36 @@ impl BluetoothCamera {
             device: None,
             characteristics: Vec::new(),
 
-            outgoing_camera_uuid: Uuid::parse_str("5DD3465F-1AEE-4299-8493-D2ECA2F8E1BB").unwrap(),
-            incoming_camera_uuid: Uuid::parse_str("B864E140-76A0-416A-BF30-5876504537D9").unwrap(),
-            timecode_uuid: Uuid::parse_str("6D8F2110-86F1-41BF-9AFB-451D87E976C8").unwrap(),
-            camera_status_uuid: Uuid::parse_str("7FE8691D-95DC-4FC5-8ABD-CA74339B51B9").unwrap(),
-            device_name_uuid: Uuid::parse_str("FFAC0C52-C9FB-41A0-B063-CC76282EB89C").unwrap(),
-            protocol_version_uuid: Uuid::parse_str("8F1FD018-B508-456F-8F82-3D392BEE2706").unwrap(),
+            outgoing_camera_uuid: protocol
+                .pluck_characteristic("outgoing_camera_control")
+                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
+                .uuid
+                .clone(),
+            incoming_camera_uuid: protocol
+                .pluck_characteristic("incoming_camera_control")
+                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
+                .uuid
+                .clone(),
+            timecode_uuid: protocol
+                .pluck_characteristic("timecode")
+                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
+                .uuid
+                .clone(),
+            camera_status_uuid: protocol
+                .pluck_characteristic("camera_status")
+                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
+                .uuid
+                .clone(),
+            device_name_uuid: protocol
+                .pluck_characteristic("device_name")
+                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
+                .uuid
+                .clone(),
+            protocol_version_uuid: protocol
+                .pluck_characteristic("protocol_version")
+                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
+                .uuid
+                .clone(),
         })
     }
 
@@ -65,7 +92,7 @@ impl BluetoothCamera {
                     v.connect().await?;
                     self.device = Some(v);
 
-                    //TODO: fix this hack once the underlying bluetooth library supports
+                    // TODO: fix this hack once the underlying bluetooth library supports
                     // actually reporting when the connection is "established".
                     // Right now on you crash the library if you try to write on OSX
                     // without waiting and the is_connected() endpoint is hardcoded
@@ -75,10 +102,10 @@ impl BluetoothCamera {
 
                     let device = self.device.as_ref().unwrap();
 
-                    //Seed the characteristics list.
+                    // Seed the characteristics list.
                     self.characteristics = device.discover_characteristics().await?;
 
-                    //Subscribe to Incoming Camera Control
+                    // Subscribe to Incoming Camera Control
                     let characteristic = self
                         .get_characteristic(self.incoming_camera_uuid)
                         .await

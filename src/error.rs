@@ -20,6 +20,15 @@ pub enum BluetoothCameraError {
     )]
     NoCharacteristic,
 
+    #[error("Cannot resolve characteristic from protocol")]
+    NoCharacteristicFromProtocol,
+
     #[error(transparent)]
     BTLEError(#[from] btleplug::Error),
+
+    #[error(transparent)]
+    IOError(#[from] std::io::Error),
+
+    #[error(transparent)]
+    UUIDError(#[from] uuid::Error),
 }

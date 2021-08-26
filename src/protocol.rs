@@ -10,6 +10,24 @@ pub struct BlackmagicCameraProtocol {
     pub bluetooth_services: Vec<BluetoothService>,
 }
 
+impl BlackmagicCameraProtocol {
+    pub fn new() -> Result<BlackmagicCameraProtocol, std::io::Error> {
+        let data = include_str!("../PROTOCOL.json");
+        let cfg: BlackmagicCameraProtocol = serde_json::from_str(&data)?;
+        Ok(cfg)
+    }
+
+    pub fn pluck_characteristic(&self, normalized_name: &str) -> Option<&Characteristic> {
+        self.bluetooth_services
+            .iter()
+            .find(|&x| x.normalized_name == "blackmagic_camera_service")
+            .unwrap()
+            .characteristics
+            .iter()
+            .find(|&y| y.normalized_name == normalized_name)
+    }
+}
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Information {
@@ -36,6 +54,8 @@ pub struct Parameter {
     #[serde(rename = "group_id")]
     pub group_id: i64,
     pub parameter: String,
+    #[serde(rename = "normalized_parameter")]
+    pub normalized_parameter: String,
     #[serde(rename = "type")]
     pub type_field: String,
     pub index: Vec<String>,
@@ -50,7 +70,7 @@ pub struct BluetoothService {
     pub name: String,
     #[serde(rename = "normalized_name")]
     pub normalized_name: String,
-    pub uuid: String,
+    pub uuid: uuid::Uuid,
     pub characteristics: Vec<Characteristic>,
 }
 
@@ -60,14 +80,7 @@ pub struct Characteristic {
     pub name: String,
     #[serde(rename = "normalized_name")]
     pub normalized_name: String,
-    pub uuid: String,
+    pub uuid: uuid::Uuid,
     pub description: Option<String>,
     pub decription: Option<String>,
-}
-
-fn main() {
-    let data = fs::read_to_string("PROTOCOL.json").unwrap();
-    let cfg: BlackmagicCameraProtocol = serde_json::from_str(&data).unwrap();
-
-    dbg!(cfg);
 }

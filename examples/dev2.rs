@@ -14,5 +14,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     time::sleep(Duration::from_secs(20)).await;
 
+    //state[blackmagic_camera_control::data::Media::Codec];
+
     Ok(())
 }

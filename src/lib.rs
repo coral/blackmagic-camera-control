@@ -8,6 +8,7 @@ pub mod bluetooth_camera;
 pub mod data;
 pub mod error;
 pub mod message;
+mod protocol;
 
 pub use bluetooth_camera::BluetoothCamera;
 pub use message::Message;
