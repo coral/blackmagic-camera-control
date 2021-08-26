@@ -1,3 +1,4 @@
+use crate::command::Command;
 use crate::error::BluetoothCameraError;
 use btleplug::api::{Central, Characteristic, Manager as _, Peripheral as _};
 use btleplug::platform::{Adapter, Manager, Peripheral};
@@ -84,7 +85,12 @@ impl BluetoothCamera {
 
                     tokio::spawn(async move {
                         while let Some(data) = stream.next().await {
-                            dbg!(data);
+                            //dbg!(&data);
+                            let cmd = Command::from_raw(&data.value);
+                            match cmd {
+                                Ok(v) => println!("{:?}", v),
+                                Err(e) => {}
+                            }
                         }
                     });
 

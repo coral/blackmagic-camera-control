@@ -1,5 +1,4 @@
 use fixed::types::I5F11;
-use num::{FromPrimitive, ToPrimitive};
 use std::convert::TryInto;
 use thiserror::Error;
 
@@ -79,7 +78,7 @@ impl RawCommand {
             data_type: data[6],
             operation: data[7],
 
-            data: data[8..8 + data[1] as usize].to_vec(),
+            data: data[8..8 + (data[1] - 4) as usize].to_vec(),
         })
     }
 }

@@ -78,6 +78,7 @@ impl Datagen {
             im.new_fn("from_raw")
                 .arg("data", "&[u8]")
                 .ret("Result<Self, CommandError>")
+                .vis("pub")
                 .push_block(from_raw);
         }
     }
