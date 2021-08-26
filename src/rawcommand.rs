@@ -1,4 +1,5 @@
 use fixed::types::I5F11;
+use num::{FromPrimitive, ToPrimitive};
 use std::convert::TryInto;
 use thiserror::Error;
 
@@ -18,6 +19,31 @@ pub enum CommandError {
 
     #[error(transparent)]
     UTF8Error(#[from] std::string::FromUtf8Error),
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Operation {
+    AssignValue,
+    OffsetValue,
+    Unknown,
+}
+
+impl Operation {
+    pub fn from_u8(id: u8) -> Self {
+        match id {
+            0 => Operation::AssignValue,
+            1 => Operation::OffsetValue,
+            _ => Operation::Unknown,
+        }
+    }
+
+    pub fn id(&self) -> u8 {
+        match self {
+            Operation::AssignValue => 0,
+            Operation::OffsetValue => 1,
+            Operation::Unknown => 2,
+        }
+    }
 }
 
 pub trait Parameter {

@@ -1,11 +1,19 @@
 use crate::error::BluetoothCameraError;
-use crate::protocol::BlackmagicCameraProtocol;
 use btleplug::api::{Central, Characteristic, Manager as _, Peripheral as _};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::stream::StreamExt;
 use std::time::Duration;
 use tokio::time;
 use uuid::Uuid;
+
+pub const CAMERA_MANUFACTURER: Uuid = Uuid::from_u128(855109558092022082745622393992443);
+pub const CAMERA_MODEL: Uuid = Uuid::from_u128(854713417279450761057654674240763);
+pub const OUTGOING_CAMERA_CONTROL: Uuid = Uuid::from_u128(124715205548830368390231916378743955899);
+pub const INCOMING_CAMERA_CONTROL: Uuid = Uuid::from_u128(245101749559754194128926468485788547033);
+pub const TIMECODE: Uuid = Uuid::from_u128(145629020620256484157652687441451644616);
+pub const CAMERA_STATUS: Uuid = Uuid::from_u128(170018700332869099062316608707586904505);
+pub const DEVICE_NAME: Uuid = Uuid::from_u128(339846463932956345205123112215954503836);
+pub const PROTOCOL_VERSION: Uuid = Uuid::from_u128(190244785298557795456958317949635929862);
 
 #[allow(dead_code)]
 pub struct BluetoothCamera {
@@ -16,19 +24,10 @@ pub struct BluetoothCamera {
 
     device: Option<Peripheral>,
     characteristics: Vec<Characteristic>,
-
-    outgoing_camera_uuid: Uuid,
-    incoming_camera_uuid: Uuid,
-    timecode_uuid: Uuid,
-    camera_status_uuid: Uuid,
-    device_name_uuid: Uuid,
-    protocol_version_uuid: Uuid,
 }
 
 impl BluetoothCamera {
     pub async fn new(name: String) -> Result<BluetoothCamera, BluetoothCameraError> {
-        let protocol = BlackmagicCameraProtocol::new()?;
-
         let bluetooth_manager = Manager::new().await?;
 
         let adapter = bluetooth_manager.adapters().await?;
@@ -44,37 +43,6 @@ impl BluetoothCamera {
             adapter,
             device: None,
             characteristics: Vec::new(),
-
-            outgoing_camera_uuid: protocol
-                .pluck_characteristic("outgoing_camera_control")
-                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
-                .uuid
-                .clone(),
-            incoming_camera_uuid: protocol
-                .pluck_characteristic("incoming_camera_control")
-                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
-                .uuid
-                .clone(),
-            timecode_uuid: protocol
-                .pluck_characteristic("timecode")
-                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
-                .uuid
-                .clone(),
-            camera_status_uuid: protocol
-                .pluck_characteristic("camera_status")
-                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
-                .uuid
-                .clone(),
-            device_name_uuid: protocol
-                .pluck_characteristic("device_name")
-                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
-                .uuid
-                .clone(),
-            protocol_version_uuid: protocol
-                .pluck_characteristic("protocol_version")
-                .ok_or(BluetoothCameraError::NoCharacteristicFromProtocol)?
-                .uuid
-                .clone(),
         })
     }
 
@@ -107,7 +75,7 @@ impl BluetoothCamera {
 
                     // Subscribe to Incoming Camera Control
                     let characteristic = self
-                        .get_characteristic(self.incoming_camera_uuid)
+                        .get_characteristic(INCOMING_CAMERA_CONTROL)
                         .await
                         .ok_or(BluetoothCameraError::NoCharacteristic)?;
 
