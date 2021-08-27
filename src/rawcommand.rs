@@ -58,6 +58,8 @@ pub trait Parameter {
     fn raw_type(&self) -> u8;
 
     fn to_bytes(&self) -> Vec<u8>;
+
+    fn name(&self) -> String;
 }
 
 #[derive(Debug)]

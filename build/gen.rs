@@ -150,6 +150,23 @@ impl Datagen {
             }
             am.push_block(mb);
         }
+
+        //name func
+        {
+            let am = im.new_fn("name").arg_ref_self().ret("String").vis("pub");
+            am.line("match self");
+
+            let mut mb = Block::new("");
+
+            for category in protocol.groups.iter() {
+                mb.line(format!(
+                    "Command::{}(v) => format!(\"{{}}_{{}}\", \"{}\".to_string(), v.name()),",
+                    &category.normalized_name.to_case(Case::UpperCamel),
+                    &category.normalized_name,
+                ));
+            }
+            am.push_block(mb);
+        }
     }
 
     fn parameters(s: &mut Scope, protocol: &BlackmagicCameraProtocol) {
@@ -293,6 +310,33 @@ impl Datagen {
                             "{}::{} => vec![0],",
                             &category.normalized_name.to_case(Case::UpperCamel),
                             &param.normalized_parameter.to_case(Case::UpperCamel),
+                        ));
+                    }
+                }
+                am.push_block(mb);
+            }
+
+            //name
+            {
+                let am = im.new_fn("name").arg_ref_self().ret("String");
+                am.line("match self");
+
+                let mut mb = Block::new("");
+
+                for param in category.parameters.iter() {
+                    if lookuptype(&param) != "Void" {
+                        mb.line(format!(
+                            "{}::{}(_) => \"{}\".to_string(),",
+                            &category.normalized_name.to_case(Case::UpperCamel),
+                            &param.normalized_parameter.to_case(Case::UpperCamel),
+                            &param.normalized_parameter
+                        ));
+                    } else {
+                        mb.line(format!(
+                            "{}::{} => \"{}\".to_string(),",
+                            &category.normalized_name.to_case(Case::UpperCamel),
+                            &param.normalized_parameter.to_case(Case::UpperCamel),
+                            &param.normalized_parameter
                         ));
                     }
                 }

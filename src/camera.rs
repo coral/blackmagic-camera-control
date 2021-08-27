@@ -4,9 +4,12 @@ use crate::rawcommand::{Operation, RawCommand};
 use btleplug::api::{Central, Characteristic, Manager as _, Peripheral as _, ValueNotification};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::stream::StreamExt;
+use std::collections::HashMap;
 use std::pin::Pin;
+use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::broadcast;
+use tokio::sync::broadcast::{self, Receiver, Sender};
+use tokio::sync::{Mutex, RwLock};
 use tokio::time;
 use uuid::Uuid;
 
@@ -30,6 +33,9 @@ pub struct BluetoothCamera {
 
     write_char: Option<Characteristic>,
     read_char: Option<Characteristic>,
+
+    updates: Arc<Mutex<Sender<Command>>>,
+    cache: Arc<RwLock<HashMap<String, Command>>>,
 }
 
 impl BluetoothCamera {
@@ -51,6 +57,9 @@ impl BluetoothCamera {
 
             write_char: None,
             read_char: None,
+
+            updates: Arc::new(Mutex::new(broadcast::channel(16).0)),
+            cache: Arc::new(RwLock::new(HashMap::new())),
         })
     }
 
@@ -101,25 +110,10 @@ impl BluetoothCamera {
                     device.subscribe(&self.read_char.as_ref().unwrap()).await?;
                     let mut stream = device.notifications().await?;
 
-                    // let (tx, _) = broadcast::channel(16);
-
-                    // tokio::spawn(async move {
-                    //     while let Some(data) = stream.next().await {
-                    //         //dbg!(&data);
-                    //         let cmd = Command::from_raw(&data.value);
-                    //         match cmd {
-                    //             Ok(v) => {
-                    //                 println!("{:?}", v);
-                    //                 //tx.send(v).unwrap();
-                    //             }
-                    //             Err(e) => {}
-                    //         }
-                    //     }
-                    // });
-
+                    let ble_cache = self.cache.clone();
+                    let ble_updates = self.updates.clone();
                     tokio::spawn(async move {
-                        let stream = stream;
-                        BluetoothCamera::handle_incoming(stream).await;
+                        BluetoothCamera::handle_incoming(ble_cache, ble_updates, stream).await;
                     });
 
                     return Ok(());
@@ -154,16 +148,24 @@ impl BluetoothCamera {
     }
 
     async fn handle_incoming(
+        cache: Arc<RwLock<HashMap<String, Command>>>,
+        updates: Arc<Mutex<Sender<Command>>>,
         mut stream: Pin<Box<dyn futures::Stream<Item = ValueNotification> + Send>>,
     ) {
         while let Some(data) = stream.next().await {
-            //dbg!(&data);
             let cmd = Command::from_raw(&data.value);
             match cmd {
-                Ok(v) => println!("{:?}", v),
+                Ok(v) => {
+                    cache.write().await.insert(v.name(), v.clone());
+                    let _ = updates.lock().await.send(v.clone());
+                }
                 Err(e) => {}
             }
         }
+    }
+
+    pub async fn updates(&mut self) -> Receiver<Command> {
+        self.updates.lock().await.subscribe()
     }
 
     async fn find_camera(&self) -> Option<Peripheral> {
