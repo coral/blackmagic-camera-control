@@ -58,7 +58,7 @@ pub trait Parameter {
 
     fn to_bytes(&self) -> Vec<u8>;
 
-    fn name(&self) -> String;
+    fn normalized_name(&self) -> String;
 }
 
 #[derive(Debug)]

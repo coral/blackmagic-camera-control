@@ -71,7 +71,7 @@ impl Datagen {
 
         // id func
         {
-            let mut id_func = im.new_fn("id").arg_ref_self().ret("u8").vis("pub");
+            let id_func = im.new_fn("id").arg_ref_self().ret("u8").vis("pub");
 
             id_func.line("match self");
 
@@ -88,7 +88,7 @@ impl Datagen {
 
         // parameter func
         {
-            let mut parameter_func = im
+            let parameter_func = im
                 .new_fn("parameter_id")
                 .arg_ref_self()
                 .ret("u8")
@@ -144,20 +144,27 @@ impl Datagen {
 
         //name func
         {
-            let am = im.new_fn("name").arg_ref_self().ret("String").vis("pub");
+            let am = im
+                .new_fn("normalized_name")
+                .arg_ref_self()
+                .ret("(String, String)")
+                .vis("pub");
             am.line("match self");
 
             let mut mb = Block::new("");
 
             for category in protocol.groups.iter() {
                 mb.line(format!(
-                    "Command::{}(v) => format!(\"{{}}_{{}}\", \"{}\".to_string(), v.name()),",
+                    "Command::{}(v) =>  (\"{}\".to_string(), v.normalized_name()),",
                     &category.normalized_name.to_case(Case::UpperCamel),
                     &category.normalized_name,
                 ));
             }
             am.push_block(mb);
         }
+
+        //from_normalized_name
+        {}
     }
 
     fn parameters(s: &mut Scope, protocol: &BlackmagicCameraProtocol) {
@@ -191,7 +198,7 @@ impl Datagen {
 
             //id function
             {
-                let mut id_block = im.new_fn("id").arg_ref_self().ret("u8");
+                let id_block = im.new_fn("id").arg_ref_self().ret("u8");
 
                 id_block.line("match self");
 
@@ -218,7 +225,7 @@ impl Datagen {
 
             //from_raw function
             {
-                let mut raw_block = im
+                let raw_block = im
                     .new_fn("from_raw")
                     .arg("cmd", "RawCommand")
                     .ret("Result<Self, CommandError>");
@@ -302,9 +309,9 @@ impl Datagen {
                 am.push_block(mb);
             }
 
-            //name
+            //normalized_name
             {
-                let am = im.new_fn("name").arg_ref_self().ret("String");
+                let am = im.new_fn("normalized_name").arg_ref_self().ret("String");
                 am.line("match self");
 
                 let mut mb = Block::new("");

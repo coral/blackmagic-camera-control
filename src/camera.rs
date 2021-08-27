@@ -154,7 +154,11 @@ impl BluetoothCamera {
             let cmd = Command::from_raw(&data.value);
             match cmd {
                 Ok(v) => {
-                    cache.write().await.insert(v.name(), v.clone());
+                    let (cg, pr) = v.normalized_name();
+                    cache
+                        .write()
+                        .await
+                        .insert(format!("{}_{}", cg, pr), v.clone());
                     let _ = updates.lock().await.send(v.clone());
                 }
                 Err(_) => {}
