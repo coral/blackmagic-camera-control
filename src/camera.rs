@@ -145,6 +145,7 @@ impl BluetoothCamera {
     pub async fn write(
         &mut self,
         destination: u8,
+        operation: Operation,
         command: Command,
     ) -> Result<(), BluetoothCameraError> {
         let device = self.device.as_ref().unwrap();
@@ -154,7 +155,7 @@ impl BluetoothCamera {
                 self.write_char
                     .as_ref()
                     .ok_or(BluetoothCameraError::NoCharacteristic)?,
-                &RawCommand::to_raw(destination, Operation::AssignValue, &command),
+                &RawCommand::to_raw(destination, operation, &command),
                 btleplug::api::WriteType::WithResponse,
             )
             .await?;

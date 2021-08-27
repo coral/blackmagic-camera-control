@@ -8,3 +8,4 @@ pub mod command {
 
 //Exports
 pub use camera::BluetoothCamera;
+pub use rawcommand::Operation;

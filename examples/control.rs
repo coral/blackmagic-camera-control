@@ -1,10 +1,10 @@
 use blackmagic_camera_control::command::{Command, Metadata, Video};
-use blackmagic_camera_control::BluetoothCamera;
+use blackmagic_camera_control::{BluetoothCamera, Operation};
 use std::error::Error;
 use std::time::Duration;
 use tokio::time;
 
-const CAMERA_NAME: &'static str = "A:4BE2529F";
+const CAMERA_NAME: &'static str = "A:5BA2429F";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -16,7 +16,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     //Change the ISO to 320
     camera
-        .write(255, Command::Video(Video::Iso(640)))
+        .write(255, Operation::AssignValue, Command::Video(Video::Iso(640)))
         .await
         .unwrap();
 
