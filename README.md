@@ -1,4 +1,4 @@
-# Iinterface with your blackmagic camera over bluetooth in Rust!
+# Interface with your Blackmagic camera over Bluetooth in Rust!
 
 This library allows you to easily communicate with your Blackmagic camera over Bluetooth.
 
