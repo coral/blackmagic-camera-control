@@ -39,7 +39,12 @@ pub struct BluetoothCamera {
 }
 
 impl BluetoothCamera {
-    pub async fn new(name: String) -> Result<BluetoothCamera, BluetoothCameraError> {
+    /// Takes the BLE name of the camera and returns a new BluetoothCamera instance
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - &str representing the Bluetooth name of the camera such as "A:5CA7128B"
+    pub async fn new(name: &str) -> Result<BluetoothCamera, BluetoothCameraError> {
         let bluetooth_manager = Manager::new().await?;
 
         let adapter = bluetooth_manager.adapters().await?;
@@ -50,7 +55,7 @@ impl BluetoothCamera {
             .ok_or(BluetoothCameraError::NoBluetooth)?;
 
         Ok(BluetoothCamera {
-            name,
+            name: name.to_string(),
             bluetooth_manager,
             adapter,
             device: None,
@@ -63,6 +68,11 @@ impl BluetoothCamera {
         })
     }
 
+    /// Tries to connect to the camera, waiting as long as supplied timeout specifies
+    ///
+    /// # Arguments
+    ///
+    /// * `timeout` - std::Duration of how long to wait before giving up
     pub async fn connect(&mut self, timeout: Duration) -> Result<(), BluetoothCameraError> {
         let now = time::Instant::now();
         self.adapter.start_scan().await?;
@@ -125,6 +135,13 @@ impl BluetoothCamera {
         Ok(())
     }
 
+    /// Disconnects from the camera
+    ///
+    /// NOTE: THIS ACTUALLY DOESN'T WORK ON OSX BECAUSE THE UNDERLYING LIBRARY IS PEPEGA
+    pub async fn disconnect(&mut self) -> Result<(), BluetoothCameraError> {
+        Ok(self.device.as_ref().unwrap().disconnect().await?)
+    }
+
     pub async fn write(
         &mut self,
         destination: u8,
@@ -166,6 +183,39 @@ impl BluetoothCamera {
         }
     }
 
+    /// Gives you the latest cached version of the supplied Command
+    /// If no cached version is found, returns the empty property
+    ///
+    /// # Arguments
+    ///
+    /// * `cmd` - Command like this: Command::Metadata(Metadata::LensDistance("".to_string()))
+    pub async fn get(&self, cmd: Command) -> Command {
+        let (cg, pr) = cmd.normalized_name();
+        match self
+            .cache
+            .clone()
+            .read()
+            .await
+            .get(&format! {"{}_{}", &cg, &pr})
+        {
+            Some(c) => c.clone(),
+            None => cmd,
+        }
+    }
+
+    /// Gives you the latest cached version of the supplied normalized_name
+    ///
+    /// # Arguments
+    ///
+    /// * `normalized_name` - &str like this: metadata_lens_distance
+    pub async fn get_normalized(&self, normalized_name: &str) -> Option<Command> {
+        match self.cache.clone().read().await.get(normalized_name) {
+            Some(c) => Some(c.clone()),
+            None => None,
+        }
+    }
+
+    /// Returns a channel which allows you to get updates from the camera
     pub async fn updates(&mut self) -> Receiver<Command> {
         self.updates.lock().await.subscribe()
     }
