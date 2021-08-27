@@ -1,6 +1,5 @@
 use crate::command::Command;
 use fixed::types::I5F11;
-use fixed::FixedI16;
 use num_traits::cast::FromPrimitive;
 use std::convert::TryInto;
 use thiserror::Error;

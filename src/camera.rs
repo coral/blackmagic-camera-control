@@ -106,7 +106,7 @@ impl BluetoothCamera {
 
                     // Subscribe to Incoming Camera Control
                     device.subscribe(&self.read_char.as_ref().unwrap()).await?;
-                    let mut stream = device.notifications().await?;
+                    let stream = device.notifications().await?;
 
                     let ble_cache = self.cache.clone();
                     let ble_updates = self.updates.clone();
@@ -157,7 +157,7 @@ impl BluetoothCamera {
                     cache.write().await.insert(v.name(), v.clone());
                     let _ = updates.lock().await.send(v.clone());
                 }
-                Err(e) => {}
+                Err(_) => {}
             }
         }
     }

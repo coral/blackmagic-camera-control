@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::fs;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,16 +14,6 @@ impl BlackmagicCameraProtocol {
         let data = include_str!("../PROTOCOL.json");
         let cfg: BlackmagicCameraProtocol = serde_json::from_str(&data)?;
         Ok(cfg)
-    }
-
-    pub fn pluck_characteristic(&self, normalized_name: &str) -> Option<&Characteristic> {
-        self.bluetooth_services
-            .iter()
-            .find(|&x| x.normalized_name == "blackmagic_camera_service")
-            .unwrap()
-            .characteristics
-            .iter()
-            .find(|&y| y.normalized_name == normalized_name)
     }
 }
 

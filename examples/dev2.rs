@@ -20,16 +20,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     dbg!("OK");
 
-    let mut rx = camera.updates().await;
-
-    loop {
-        let m = rx.recv().await;
-        dbg!(&m);
-    }
-
-    time::sleep(Duration::from_secs(5)).await;
-
-    //state[blackmagic_camera_control::data::Media::Codec];
+    time::sleep(Duration::from_secs(10)).await;
 
     Ok(())
 }

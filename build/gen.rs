@@ -3,7 +3,7 @@ use crate::protocol::{BlackmagicCameraProtocol, Parameter};
 use codegen::{Block, Scope};
 use convert_case::{Case, Casing};
 
-static derive_traits: [&str; 4] = ["Debug", "PartialEq", "Clone", "PartialOrd"];
+static DERIVE_TRAITS: [&str; 4] = ["Debug", "PartialEq", "Clone", "PartialOrd"];
 
 pub struct Datagen {
     protocol: BlackmagicCameraProtocol,
@@ -25,8 +25,6 @@ impl Datagen {
     }
 
     fn imports(s: &mut Scope) {
-        s.import("fixed::types", "I5F11");
-        s.import("thiserror", "Error");
         s.import(
             "crate::rawcommand",
             "{CommandError, RawCommand, ParamType, Parameter}",
@@ -34,8 +32,8 @@ impl Datagen {
     }
 
     fn commands(s: &mut Scope, protocol: &BlackmagicCameraProtocol) {
-        let mut data = s.new_enum("Command").vis("pub");
-        for t in derive_traits {
+        let data = s.new_enum("Command").vis("pub");
+        for t in DERIVE_TRAITS {
             data.derive(t);
         }
 
@@ -172,10 +170,10 @@ impl Datagen {
     fn parameters(s: &mut Scope, protocol: &BlackmagicCameraProtocol) {
         //Enums
         for category in protocol.groups.iter() {
-            let mut data = s
+            let data = s
                 .new_enum(&category.normalized_name.to_case(Case::UpperCamel))
                 .vis("pub");
-            for t in derive_traits {
+            for t in DERIVE_TRAITS {
                 data.derive(t);
             }
 

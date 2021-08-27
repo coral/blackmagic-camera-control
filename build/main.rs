@@ -1,12 +1,8 @@
 use std::env;
-use std::fs::File;
-use std::io::prelude::*;
 use std::path::Path;
 
 mod gen;
 mod protocol;
-
-use protocol::{BlackmagicCameraProtocol, Parameter};
 
 fn main() {
     let prt = protocol::BlackmagicCameraProtocol::new().unwrap();
