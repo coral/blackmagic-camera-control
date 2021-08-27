@@ -1,9 +1,11 @@
 use crate::command::Command;
 use crate::error::BluetoothCameraError;
-use btleplug::api::{Central, Characteristic, Manager as _, Peripheral as _};
+use btleplug::api::{Central, Characteristic, Manager as _, Peripheral as _, ValueNotification};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::stream::StreamExt;
+use std::pin::Pin;
 use std::time::Duration;
+use tokio::sync::broadcast;
 use tokio::time;
 use uuid::Uuid;
 
@@ -24,7 +26,9 @@ pub struct BluetoothCamera {
     adapter: Adapter,
 
     device: Option<Peripheral>,
-    characteristics: Vec<Characteristic>,
+
+    write_char: Option<Characteristic>,
+    read_char: Option<Characteristic>,
 }
 
 impl BluetoothCamera {
@@ -43,7 +47,9 @@ impl BluetoothCamera {
             bluetooth_manager,
             adapter,
             device: None,
-            characteristics: Vec::new(),
+
+            write_char: None,
+            read_char: None,
         })
     }
 
@@ -72,27 +78,46 @@ impl BluetoothCamera {
                     let device = self.device.as_ref().unwrap();
 
                     // Seed the characteristics list.
-                    self.characteristics = device.discover_characteristics().await?;
+                    let char = device.discover_characteristics().await?;
 
-                    // Subscribe to Incoming Camera Control
-                    let characteristic = self
-                        .get_characteristic(INCOMING_CAMERA_CONTROL)
-                        .await
+                    let inc = char
+                        .iter()
+                        .find(|c| c.uuid == INCOMING_CAMERA_CONTROL)
                         .ok_or(BluetoothCameraError::NoCharacteristic)?;
 
-                    device.subscribe(characteristic).await?;
+                    self.read_char = Some(inc.to_owned());
+
+                    let ouc = char
+                        .iter()
+                        .find(|c| c.uuid == OUTGOING_CAMERA_CONTROL)
+                        .ok_or(BluetoothCameraError::NoCharacteristic)?;
+
+                    self.write_char = Some(ouc.to_owned());
+
+                    // Subscribe to Incoming Camera Control
+                    device.subscribe(&self.read_char.as_ref().unwrap()).await?;
                     let mut stream = device.notifications().await?;
+
+                    // let (tx, _) = broadcast::channel(16);
 
                     tokio::spawn(async move {
                         while let Some(data) = stream.next().await {
                             //dbg!(&data);
                             let cmd = Command::from_raw(&data.value);
                             match cmd {
-                                Ok(v) => println!("{:?}", v),
+                                Ok(v) => {
+                                    println!("{:?}", v);
+                                    //tx.send(v).unwrap();
+                                }
                                 Err(e) => {}
                             }
                         }
                     });
+
+                    // tokio::spawn(async move {
+                    //     let stream = stream;
+                    //     BluetoothCamera::handle_incoming(stream).await;
+                    // });
 
                     return Ok(());
                 }
@@ -103,6 +128,17 @@ impl BluetoothCamera {
         }
 
         Ok(())
+    }
+
+    async fn handle_incoming(mut stream: Pin<Box<dyn futures::Stream<Item = ValueNotification>>>) {
+        while let Some(data) = stream.next().await {
+            //dbg!(&data);
+            let cmd = Command::from_raw(&data.value);
+            match cmd {
+                Ok(v) => println!("{:?}", v),
+                Err(e) => {}
+            }
+        }
     }
 
     async fn find_camera(&self) -> Option<Peripheral> {
@@ -121,7 +157,7 @@ impl BluetoothCamera {
         None
     }
 
-    async fn get_characteristic(&self, char: Uuid) -> Option<&Characteristic> {
-        self.characteristics.iter().find(|c| c.uuid == char)
-    }
+    // async fn get_characteristic(&self, char: Uuid) -> Option<&Characteristic> {
+    //     self.characteristics.iter().find(|c| c.uuid == char)
+    // }
 }

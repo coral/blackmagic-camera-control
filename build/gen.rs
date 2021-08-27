@@ -18,7 +18,6 @@ impl Datagen {
         let mut scope = Scope::new();
 
         Datagen::imports(&mut scope);
-        //Datagen::traits(&mut scope);
         Datagen::commands(&mut scope, &self.protocol);
         Datagen::parameters(&mut scope, &self.protocol);
 
@@ -32,15 +31,6 @@ impl Datagen {
             "crate::rawcommand",
             "{CommandError, RawCommand, ParamType, Parameter}",
         );
-    }
-
-    fn traits(s: &mut Scope) {
-        let t = s.new_trait("Parameter");
-        t.new_fn("id").arg_self().ret("u8");
-        t.new_fn("from_raw")
-            .arg("cmd", "RawCommand")
-            .ret("Result<Self, CommandError>")
-            .bound("Self", "Sized");
     }
 
     fn commands(s: &mut Scope, protocol: &BlackmagicCameraProtocol) {
