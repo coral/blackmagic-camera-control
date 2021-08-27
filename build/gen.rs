@@ -71,6 +71,85 @@ impl Datagen {
                 .vis("pub")
                 .push_block(from_raw);
         }
+
+        // id func
+        {
+            let mut id_func = Block::new("");
+            id_func.line("match self");
+
+            let mut match_block = Block::new("");
+            for category in protocol.groups.iter() {
+                match_block.line(format!(
+                    "Command::{}(_) => {},",
+                    &category.normalized_name.to_case(Case::UpperCamel),
+                    &category.id
+                ));
+            }
+            id_func.push_block(match_block);
+
+            im.new_fn("id")
+                .arg_ref_self()
+                .ret("u8")
+                .vis("pub")
+                .push_block(id_func);
+        }
+
+        // parameter func
+        {
+            let mut parameter_func = Block::new("");
+            parameter_func.line("match self");
+
+            let mut match_block = Block::new("");
+            for category in protocol.groups.iter() {
+                match_block.line(format!(
+                    "Command::{}(v) => v.id(),",
+                    &category.normalized_name.to_case(Case::UpperCamel),
+                ));
+            }
+            parameter_func.push_block(match_block);
+
+            im.new_fn("parameter_id")
+                .arg_ref_self()
+                .ret("u8")
+                .vis("pub")
+                .push_block(parameter_func);
+        }
+
+        //raw_type func
+        {
+            let am = im.new_fn("raw_type").arg_ref_self().ret("u8").vis("pub");
+            am.line("match self");
+
+            let mut mb = Block::new("");
+
+            for category in protocol.groups.iter() {
+                mb.line(format!(
+                    "Command::{}(v) => v.raw_type(),",
+                    &category.normalized_name.to_case(Case::UpperCamel),
+                ));
+            }
+            am.push_block(mb);
+        }
+
+        //to_bytes func
+        {
+            let am = im
+                .new_fn("to_bytes")
+                .arg_ref_self()
+                .ret("Vec<u8>")
+                .vis("pub");
+            am.line("match self");
+
+            let mut mb = Block::new("");
+
+            for category in protocol.groups.iter() {
+                mb.line(format!(
+                    "Command::{}(v) => v.to_bytes(),",
+                    &category.normalized_name.to_case(Case::UpperCamel),
+                ));
+            }
+            am.push_block(mb);
+        }
     }
 
     fn parameters(s: &mut Scope, protocol: &BlackmagicCameraProtocol) {
@@ -127,7 +206,10 @@ impl Datagen {
                 }
                 id_block.push_block(enum_block);
 
-                im.new_fn("id").arg_self().ret("u8").push_block(id_block);
+                im.new_fn("id")
+                    .arg_ref_self()
+                    .ret("u8")
+                    .push_block(id_block);
             }
 
             //from_raw function
@@ -164,6 +246,58 @@ impl Datagen {
                     .ret("Result<Self, CommandError>")
                     .push_block(raw_block);
             }
+
+            //Raw type
+            {
+                let am = im.new_fn("raw_type").arg_ref_self().ret("u8");
+                am.line("match self");
+
+                let mut mb = Block::new("");
+
+                for param in category.parameters.iter() {
+                    if lookuptype(&param) != "Void" {
+                        mb.line(format!(
+                            "{}::{}(_) => {},",
+                            &category.normalized_name.to_case(Case::UpperCamel),
+                            &param.normalized_parameter.to_case(Case::UpperCamel),
+                            typeid(&param)
+                        ));
+                    } else {
+                        mb.line(format!(
+                            "{}::{} => {},",
+                            &category.normalized_name.to_case(Case::UpperCamel),
+                            &param.normalized_parameter.to_case(Case::UpperCamel),
+                            typeid(&param)
+                        ));
+                    }
+                }
+                am.push_block(mb);
+            }
+
+            //to_bytes
+            {
+                let am = im.new_fn("to_bytes").arg_ref_self().ret("Vec<u8>");
+                am.line("match self");
+
+                let mut mb = Block::new("");
+
+                for param in category.parameters.iter() {
+                    if lookuptype(&param) != "Void" {
+                        mb.line(format!(
+                            "{}::{}(v) => v.to_bytes(),",
+                            &category.normalized_name.to_case(Case::UpperCamel),
+                            &param.normalized_parameter.to_case(Case::UpperCamel),
+                        ));
+                    } else {
+                        mb.line(format!(
+                            "{}::{} => vec![0],",
+                            &category.normalized_name.to_case(Case::UpperCamel),
+                            &param.normalized_parameter.to_case(Case::UpperCamel),
+                        ));
+                    }
+                }
+                am.push_block(mb);
+            }
         }
     }
 }
@@ -191,5 +325,18 @@ fn lookuptype(p: &Parameter) -> &'static str {
             "fixed16" => "f32",
             _ => "Void",
         }
+    }
+}
+
+fn typeid(p: &Parameter) -> u8 {
+    match p.type_field.as_ref() {
+        "void" => 0,
+        "int8" => 1,
+        "int16" => 2,
+        "int32" => 3,
+        "int64" => 4,
+        "string" => 5,
+        "fixed16" => 128,
+        _ => 0,
     }
 }

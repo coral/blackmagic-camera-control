@@ -4,6 +4,8 @@ pub mod command {
     include!(concat!(env!("OUT_DIR"), "/command.rs"));
 }
 
-pub mod bluetooth_camera;
+pub mod camera;
 pub mod error;
-pub use bluetooth_camera::BluetoothCamera;
+
+//Exports
+pub use camera::BluetoothCamera;

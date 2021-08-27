@@ -1,4 +1,7 @@
+use crate::command::Command;
 use fixed::types::I5F11;
+use fixed::FixedI16;
+use num_traits::cast::FromPrimitive;
 use std::convert::TryInto;
 use thiserror::Error;
 
@@ -46,11 +49,15 @@ impl Operation {
 }
 
 pub trait Parameter {
-    fn id(self) -> u8;
+    fn id(&self) -> u8;
 
     fn from_raw(cmd: RawCommand) -> Result<Self, CommandError>
     where
         Self: Sized;
+
+    fn raw_type(&self) -> u8;
+
+    fn to_bytes(&self) -> Vec<u8>;
 }
 
 #[derive(Debug)]
@@ -81,17 +88,52 @@ impl RawCommand {
             data: data[8..8 + (data[1] - 4) as usize].to_vec(),
         })
     }
+
+    pub fn to_raw(destination: u8, operation: Operation, cmd: &Command) -> Vec<u8> {
+        let mut v = Vec::new();
+
+        let mut data = cmd.to_bytes();
+
+        //Destination
+        v.push(destination);
+        //Length
+        v.push(data.len() as u8 + 4);
+        //Command id
+        v.push(0);
+        //Reserved
+        v.push(0);
+
+        //Category
+        v.push(cmd.id());
+        //Paramter
+        v.push(cmd.parameter_id());
+        //Type
+        v.push(cmd.raw_type());
+        //Operation
+        v.push(operation.id());
+
+        //Data
+        v.append(&mut data);
+
+        v
+    }
 }
 
 pub trait ParamType {
     fn from_bytes(data: &[u8]) -> Result<Self, CommandError>
     where
         Self: Sized;
+
+    fn to_bytes(&self) -> Vec<u8>;
 }
 
 impl ParamType for String {
     fn from_bytes(data: &[u8]) -> Result<Self, CommandError> {
         Ok(String::from_utf8(data.to_vec())?)
+    }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        self.as_bytes().to_vec()
     }
 }
 
@@ -101,6 +143,10 @@ impl ParamType for u8 {
             .map(|v| *v as u8)
             .ok_or(CommandError::NotEnoughBytes)
     }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        self.to_le_bytes().to_vec()
+    }
 }
 
 impl ParamType for i8 {
@@ -108,6 +154,10 @@ impl ParamType for i8 {
         data.first()
             .map(|v| *v as i8)
             .ok_or(CommandError::NotEnoughBytes)
+    }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        self.to_le_bytes().to_vec()
     }
 }
 
@@ -118,6 +168,10 @@ impl ParamType for i16 {
             .ok_or(CommandError::NotEnoughBytes)
             .map(|x| i16::from_le_bytes(x.try_into().unwrap()))
     }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        self.to_le_bytes().to_vec()
+    }
 }
 
 impl ParamType for i32 {
@@ -126,6 +180,10 @@ impl ParamType for i32 {
             .next()
             .ok_or(CommandError::NotEnoughBytes)
             .map(|x| i32::from_le_bytes(x.try_into().unwrap()))
+    }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        self.to_le_bytes().to_vec()
     }
 }
 
@@ -136,6 +194,10 @@ impl ParamType for i64 {
             .ok_or(CommandError::NotEnoughBytes)
             .map(|x| i64::from_le_bytes(x.try_into().unwrap()))
     }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        self.to_le_bytes().to_vec()
+    }
 }
 
 impl ParamType for f32 {
@@ -145,6 +207,10 @@ impl ParamType for f32 {
             .ok_or(CommandError::NotEnoughBytes)
             .map(|x| f32::from(I5F11::from_le_bytes(x.try_into().unwrap())))
     }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        I5F11::from_f32(*self).unwrap().to_le_bytes().to_vec()
+    }
 }
 
 impl<T: ParamType> ParamType for Vec<T> {
@@ -152,5 +218,9 @@ impl<T: ParamType> ParamType for Vec<T> {
         data.chunks_exact(std::mem::size_of::<T>())
             .map(<T as ParamType>::from_bytes)
             .collect()
+    }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        self.iter().flat_map(|x| x.to_bytes()).collect()
     }
 }
