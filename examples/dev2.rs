@@ -6,15 +6,18 @@ use tokio::time;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+
+    //Create a new camera with the device name
     let mut camera = BluetoothCamera::new("A:4BE2529F".to_string())
         .await
         .unwrap();
+
+    //Connect with a set timeout
     camera.connect(Duration::from_secs(10)).await.unwrap();
 
-    dbg!("Connected");
-
+    //Change the ISO to 320
     camera
-        .write_command(255, Command::Video(Video::Iso(1600)))
+        .write(255, Command::Video(Video::Iso(320)))
         .await
         .unwrap();
 

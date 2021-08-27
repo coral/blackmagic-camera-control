@@ -48,7 +48,12 @@ impl Datagen {
 
         // from_raw func
         {
-            let mut from_raw = Block::new("");
+            let from_raw = im
+                .new_fn("from_raw")
+                .arg("data", "&[u8]")
+                .ret("Result<Self, CommandError>")
+                .vis("pub");
+
             from_raw.line("let raw_cmd = RawCommand::from_raw(data)?;");
             from_raw.line("match raw_cmd.category");
 
@@ -62,17 +67,12 @@ impl Datagen {
             }
             match_block.line("_ => Err(CommandError::CategoryNotDefined)");
             from_raw.push_block(match_block);
-
-            im.new_fn("from_raw")
-                .arg("data", "&[u8]")
-                .ret("Result<Self, CommandError>")
-                .vis("pub")
-                .push_block(from_raw);
         }
 
         // id func
         {
-            let mut id_func = Block::new("");
+            let mut id_func = im.new_fn("id").arg_ref_self().ret("u8").vis("pub");
+
             id_func.line("match self");
 
             let mut match_block = Block::new("");
@@ -84,17 +84,16 @@ impl Datagen {
                 ));
             }
             id_func.push_block(match_block);
-
-            im.new_fn("id")
-                .arg_ref_self()
-                .ret("u8")
-                .vis("pub")
-                .push_block(id_func);
         }
 
         // parameter func
         {
-            let mut parameter_func = Block::new("");
+            let mut parameter_func = im
+                .new_fn("parameter_id")
+                .arg_ref_self()
+                .ret("u8")
+                .vis("pub");
+
             parameter_func.line("match self");
 
             let mut match_block = Block::new("");
@@ -105,12 +104,6 @@ impl Datagen {
                 ));
             }
             parameter_func.push_block(match_block);
-
-            im.new_fn("parameter_id")
-                .arg_ref_self()
-                .ret("u8")
-                .vis("pub")
-                .push_block(parameter_func);
         }
 
         //raw_type func
@@ -198,7 +191,8 @@ impl Datagen {
 
             //id function
             {
-                let mut id_block = codegen::Block::new("");
+                let mut id_block = im.new_fn("id").arg_ref_self().ret("u8");
+
                 id_block.line("match self");
 
                 let mut enum_block = codegen::Block::new("");
@@ -220,16 +214,15 @@ impl Datagen {
                     }
                 }
                 id_block.push_block(enum_block);
-
-                im.new_fn("id")
-                    .arg_ref_self()
-                    .ret("u8")
-                    .push_block(id_block);
             }
 
             //from_raw function
             {
-                let mut raw_block = Block::new("");
+                let mut raw_block = im
+                    .new_fn("from_raw")
+                    .arg("cmd", "RawCommand")
+                    .ret("Result<Self, CommandError>");
+
                 raw_block.line("match cmd.parameter");
 
                 let mut match_block = Block::new("");
@@ -255,11 +248,6 @@ impl Datagen {
                 match_block.line("_ => Err(CommandError::ParameterNotDefined),");
 
                 raw_block.push_block(match_block);
-
-                im.new_fn("from_raw")
-                    .arg("cmd", "RawCommand")
-                    .ret("Result<Self, CommandError>")
-                    .push_block(raw_block);
             }
 
             //Raw type

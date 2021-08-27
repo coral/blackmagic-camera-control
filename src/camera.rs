@@ -125,7 +125,7 @@ impl BluetoothCamera {
         Ok(())
     }
 
-    pub async fn write_command(
+    pub async fn write(
         &mut self,
         destination: u8,
         command: Command,
