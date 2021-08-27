@@ -87,8 +87,6 @@ impl BluetoothCamera {
 
                     let device = self.device.as_ref().unwrap();
 
-                    let m: f64 = 2.0;
-
                     // Seed the characteristics list.
                     let char = device.discover_characteristics().await?;
 
