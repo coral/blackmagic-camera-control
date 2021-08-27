@@ -1,10 +1,16 @@
 [package]
 name = "blackmagic-camera-control"
 version = "0.1.0"
+authors = ["coral <jonas@jonasbengtson.se>"]
 edition = "2018"
 build = "build/main.rs"
+license = "MIT"
+keywords = ["blackmagic", "cinema", "camera", "bluetooth", "control", "blackmagic design", "ursa", "protocol"]
+categories = ["multimedia::video", "parsing"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "blackmagic_camera_control"
+path = "src/lib.rs"
 
 [dependencies]
 btleplug = "0.8.1"
