@@ -162,9 +162,6 @@ impl Datagen {
             }
             am.push_block(mb);
         }
-
-        //from_normalized_name
-        {}
     }
 
     fn parameters(s: &mut Scope, protocol: &BlackmagicCameraProtocol) {

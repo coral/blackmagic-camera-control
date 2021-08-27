@@ -73,6 +73,7 @@ pub struct RawCommand {
 }
 
 impl RawCommand {
+    /// Takes the BLE name of the camera and returns a new BluetoothCamera instance
     pub fn from_raw(data: &[u8]) -> Result<Self, CommandError> {
         if data.len() < 8 {
             return Err(CommandError::MessageShort);
