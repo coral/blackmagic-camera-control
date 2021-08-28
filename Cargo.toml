@@ -5,7 +5,7 @@ authors = ["coral <jonas@jonasbengtson.se>"]
 edition = "2018"
 build = "build/main.rs"
 license = "MIT"
-keywords = ["blackmagic", "cinema", "camera", "bluetooth", "control", "blackmagic design", "ursa", "protocol"]
+keywords = ["blackmagic", "cinema", "camera", "bluetooth", "control", "blackmagic-design", "ursa", "protocol"]
 categories = ["multimedia::video", "parsing"]
 
 [lib]
