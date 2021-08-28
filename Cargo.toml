@@ -7,6 +7,7 @@ build = "build/main.rs"
 license = "MIT"
 keywords = ["blackmagic", "cinema", "camera", "bluetooth", "control"]
 categories = ["multimedia::video", "parsing"]
+description = "Interface with your Blackmagic camera over Bluetooth Low Energy in Rust"
 
 [lib]
 name = "blackmagic_camera_control"
