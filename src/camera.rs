@@ -132,7 +132,7 @@ impl BluetoothCamera {
             time::sleep(Duration::from_millis(50)).await;
         }
 
-        Ok(())
+        Err(BluetoothCameraError::ConnectError)
     }
 
     /// Disconnects from the camera
@@ -148,7 +148,10 @@ impl BluetoothCamera {
         operation: Operation,
         command: Command,
     ) -> Result<(), BluetoothCameraError> {
-        let device = self.device.as_ref().unwrap();
+        let device = self
+            .device
+            .as_ref()
+            .ok_or(BluetoothCameraError::SendError)?;
 
         device
             .write(
@@ -156,7 +159,7 @@ impl BluetoothCamera {
                     .as_ref()
                     .ok_or(BluetoothCameraError::NoCharacteristic)?,
                 &RawCommand::to_raw(destination, operation, &command),
-                btleplug::api::WriteType::WithResponse,
+                btleplug::api::WriteType::WithoutResponse,
             )
             .await?;
 

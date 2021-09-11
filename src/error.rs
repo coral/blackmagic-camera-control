@@ -23,8 +23,11 @@ pub enum BluetoothCameraError {
     #[error("Cannot resolve characteristic from protocol")]
     NoCharacteristicFromProtocol,
 
-    #[error("Could not send to camera.")]
+    #[error("Could not send to camera. Did you run connect()?")]
     SendError,
+
+    #[error("Could not connect to the camera.")]
+    ConnectError,
 
     #[error(transparent)]
     BTLEError(#[from] btleplug::Error),

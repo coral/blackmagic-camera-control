@@ -29,6 +29,7 @@ impl Datagen {
             "crate::rawcommand",
             "{CommandError, RawCommand, ParamType, Parameter}",
         );
+        s.import("std", "fmt");
     }
 
     fn commands(s: &mut Scope, protocol: &BlackmagicCameraProtocol) {
@@ -161,6 +162,29 @@ impl Datagen {
                 ));
             }
             am.push_block(mb);
+        }
+
+        //Display trait
+        {
+            let tr = s
+                .new_impl("Command")
+                .impl_trait("fmt::Display")
+                .new_fn("fmt")
+                .arg_ref_self()
+                .arg("f", "&mut fmt::Formatter<'_>")
+                .ret("fmt::Result")
+                .line("match self");
+
+            let mut mb = Block::new("");
+
+            for category in protocol.groups.iter() {
+                mb.line(format!(
+                    "Command::{}(v) =>  write!(f, \"{{}}\", v.to_string()),",
+                    &category.normalized_name.to_case(Case::UpperCamel)
+                ));
+            }
+
+            tr.push_block(mb);
         }
     }
 
@@ -332,6 +356,36 @@ impl Datagen {
                 }
                 am.push_block(mb);
             }
+        }
+
+        //Implementations of fmt::Display for subenum
+        for category in protocol.groups.iter() {
+            let im = s
+                .new_impl(&category.normalized_name.to_case(Case::UpperCamel))
+                .impl_trait("fmt::Display")
+                .new_fn("fmt")
+                .arg_ref_self()
+                .arg("f", "&mut fmt::Formatter<'_>")
+                .ret("fmt::Result")
+                .line("match self");
+            let mut mb = Block::new("");
+
+            for param in category.parameters.iter() {
+                if lookuptype(&param) != "Void" {
+                    mb.line(format!(
+                        "{}::{}(v) => write!(f, \"{{}}\", v.data_as_string()),",
+                        &category.normalized_name.to_case(Case::UpperCamel),
+                        &param.normalized_parameter.to_case(Case::UpperCamel),
+                    ));
+                } else {
+                    mb.line(format!(
+                        "{}::{} => write!(f, \"true\"),",
+                        &category.normalized_name.to_case(Case::UpperCamel),
+                        &param.normalized_parameter.to_case(Case::UpperCamel),
+                    ));
+                }
+            }
+            im.push_block(mb);
         }
     }
 }

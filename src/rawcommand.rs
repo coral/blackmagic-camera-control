@@ -2,6 +2,7 @@ use crate::command::Command;
 use fixed::types::I5F11;
 use num_traits::cast::FromPrimitive;
 use std::convert::TryInto;
+use std::fmt;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -127,6 +128,8 @@ pub trait ParamType {
         Self: Sized;
 
     fn to_bytes(&self) -> Vec<u8>;
+
+    fn data_as_string(&self) -> String;
 }
 
 impl ParamType for String {
@@ -136,6 +139,9 @@ impl ParamType for String {
 
     fn to_bytes(&self) -> Vec<u8> {
         self.as_bytes().to_vec()
+    }
+    fn data_as_string(&self) -> String {
+        self.clone()
     }
 }
 
@@ -149,6 +155,9 @@ impl ParamType for u8 {
     fn to_bytes(&self) -> Vec<u8> {
         self.to_le_bytes().to_vec()
     }
+    fn data_as_string(&self) -> String {
+        self.to_string()
+    }
 }
 
 impl ParamType for i8 {
@@ -160,6 +169,10 @@ impl ParamType for i8 {
 
     fn to_bytes(&self) -> Vec<u8> {
         self.to_le_bytes().to_vec()
+    }
+
+    fn data_as_string(&self) -> String {
+        self.to_string()
     }
 }
 
@@ -174,6 +187,9 @@ impl ParamType for i16 {
     fn to_bytes(&self) -> Vec<u8> {
         self.to_le_bytes().to_vec()
     }
+    fn data_as_string(&self) -> String {
+        self.to_string()
+    }
 }
 
 impl ParamType for i32 {
@@ -186,6 +202,10 @@ impl ParamType for i32 {
 
     fn to_bytes(&self) -> Vec<u8> {
         self.to_le_bytes().to_vec()
+    }
+
+    fn data_as_string(&self) -> String {
+        self.to_string()
     }
 }
 
@@ -200,6 +220,10 @@ impl ParamType for i64 {
     fn to_bytes(&self) -> Vec<u8> {
         self.to_le_bytes().to_vec()
     }
+
+    fn data_as_string(&self) -> String {
+        self.to_string()
+    }
 }
 
 impl ParamType for f32 {
@@ -213,6 +237,10 @@ impl ParamType for f32 {
     fn to_bytes(&self) -> Vec<u8> {
         I5F11::from_f32(*self).unwrap().to_le_bytes().to_vec()
     }
+
+    fn data_as_string(&self) -> String {
+        self.to_string()
+    }
 }
 
 impl<T: ParamType> ParamType for Vec<T> {
@@ -224,5 +252,18 @@ impl<T: ParamType> ParamType for Vec<T> {
 
     fn to_bytes(&self) -> Vec<u8> {
         self.iter().flat_map(|x| x.to_bytes()).collect()
+    }
+
+    fn data_as_string(&self) -> String {
+        let mut out = String::new();
+
+        for (index, val) in self.iter().enumerate() {
+            if index != 0 {
+                out.push_str(", ");
+            }
+            out.push_str(&val.data_as_string());
+        }
+
+        out
     }
 }

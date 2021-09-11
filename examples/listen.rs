@@ -14,20 +14,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //Connect with a set timeout
     camera.connect(Duration::from_secs(10)).await.unwrap();
 
-    dbg!("connected");
-
-    time::sleep(Duration::from_secs(5)).await;
-
-    time::sleep(Duration::from_secs(5)).await;
-
-    //Change the ISO to 320
-    camera
-        .write(255, Operation::AssignValue, Command::Video(Video::Iso(320)))
-        .await
-        .unwrap();
-
-    dbg!("i am past");
-
     //Subscribe to updates from the camera;
     let mut updates = camera.updates().await;
 
@@ -43,13 +29,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     });
 
-    time::sleep(Duration::from_secs(5)).await;
-
-    // Get a specific piece of info from the cached properties
-    let info = camera
-        .get(Command::Metadata(Metadata::LensDistance("".to_string())))
-        .await;
-    dbg!(info);
+    time::sleep(Duration::from_secs(10)).await;
 
     Ok(())
 }
