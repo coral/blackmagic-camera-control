@@ -2,7 +2,6 @@ use crate::command::Command;
 use fixed::types::I5F11;
 use num_traits::cast::FromPrimitive;
 use std::convert::TryInto;
-use std::fmt;
 use thiserror::Error;
 
 #[derive(Error, Debug)]

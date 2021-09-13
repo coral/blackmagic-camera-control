@@ -9,7 +9,7 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::broadcast::{self, Receiver, Sender};
-use tokio::sync::{Mutex, RwLock};
+use tokio::sync::RwLock;
 use tokio::time;
 use uuid::Uuid;
 
@@ -34,7 +34,7 @@ pub struct BluetoothCamera {
     write_char: Option<Characteristic>,
     read_char: Option<Characteristic>,
 
-    updates: Arc<Mutex<Sender<Command>>>,
+    updates: Sender<Command>,
     cache: Arc<RwLock<HashMap<String, Command>>>,
 }
 
@@ -63,7 +63,7 @@ impl BluetoothCamera {
             write_char: None,
             read_char: None,
 
-            updates: Arc::new(Mutex::new(broadcast::channel(16).0)),
+            updates: broadcast::channel(16).0,
             cache: Arc::new(RwLock::new(HashMap::new())),
         })
     }
@@ -168,7 +168,7 @@ impl BluetoothCamera {
 
     async fn handle_incoming(
         cache: Arc<RwLock<HashMap<String, Command>>>,
-        updates: Arc<Mutex<Sender<Command>>>,
+        updates: Sender<Command>,
         mut stream: Pin<Box<dyn futures::Stream<Item = ValueNotification> + Send>>,
     ) {
         while let Some(data) = stream.next().await {
@@ -180,7 +180,7 @@ impl BluetoothCamera {
                         .write()
                         .await
                         .insert(format!("{}_{}", cg, pr), v.clone());
-                    let _ = updates.lock().await.send(v.clone());
+                    let _ = updates.send(v.clone());
                 }
                 Err(_) => {}
             }
@@ -221,7 +221,7 @@ impl BluetoothCamera {
 
     /// Returns a channel which allows you to get updates from the camera
     pub async fn updates(&mut self) -> Receiver<Command> {
-        self.updates.lock().await.subscribe()
+        self.updates.subscribe()
     }
 
     async fn find_camera(&self) -> Option<Peripheral> {
