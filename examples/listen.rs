@@ -14,6 +14,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //Connect with a set timeout
     camera.connect(Duration::from_secs(10)).await.unwrap();
 
+    dbg!("CONNECTED");
+
     //Subscribe to updates from the camera;
     let mut updates = camera.updates().await;
 

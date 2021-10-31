@@ -1,7 +1,9 @@
 use crate::command::Command;
 use crate::error::BluetoothCameraError;
 use crate::rawcommand::{Operation, RawCommand};
-use btleplug::api::{Central, Characteristic, Manager as _, Peripheral as _, ValueNotification};
+use btleplug::api::{
+    Central, Characteristic, Manager as _, Peripheral as _, ScanFilter, ValueNotification,
+};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::stream::StreamExt;
 use std::collections::HashMap;
@@ -75,7 +77,11 @@ impl BluetoothCamera {
     /// * `timeout` - std::Duration of how long to wait before giving up
     pub async fn connect(&mut self, timeout: Duration) -> Result<(), BluetoothCameraError> {
         let now = time::Instant::now();
-        self.adapter.start_scan().await?;
+        self.adapter
+            .start_scan(ScanFilter {
+                services: vec![OUTGOING_CAMERA_CONTROL],
+            })
+            .await?;
 
         loop {
             if now.elapsed().as_millis() > timeout.as_millis() {
@@ -98,7 +104,9 @@ impl BluetoothCamera {
                     let device = self.device.as_ref().unwrap();
 
                     // Seed the characteristics list.
-                    let char = device.discover_characteristics().await?;
+                    device.discover_services().await?;
+
+                    let char = device.characteristics();
 
                     let inc = char
                         .iter()

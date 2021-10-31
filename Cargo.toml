@@ -15,7 +15,7 @@ name = "blackmagic_camera_control"
 path = "src/lib.rs"
 
 [dependencies]
-btleplug = "0.8.1"
+btleplug = "0.9.0"
 fixed = {version = "1.9.0", features = ["num-traits"]}
 futures = "0.3.16"
 num-traits = "0.2.14"
