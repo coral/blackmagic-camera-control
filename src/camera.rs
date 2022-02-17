@@ -85,6 +85,7 @@ impl BluetoothCamera {
             .await?;
 
         loop {
+            // TODO Port this to TokioTimeout
             if now.elapsed().as_millis() > timeout.as_millis() {
                 break;
             }
@@ -148,9 +149,9 @@ impl BluetoothCamera {
                     //dbg!(e);
                 }
             }
-        }
 
-        time::sleep(Duration::from_millis(50)).await;
+            time::sleep(Duration::from_millis(50)).await;
+        }
 
         Err(BluetoothCameraError::ConnectError)
     }
