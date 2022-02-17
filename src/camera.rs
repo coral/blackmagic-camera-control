@@ -1,7 +1,9 @@
 use crate::command::Command;
 use crate::error::BluetoothCameraError;
 use crate::rawcommand::{Operation, RawCommand};
-use btleplug::api::{Central, Characteristic, Manager as _, Peripheral as _, ValueNotification};
+use btleplug::api::{
+    Central, Characteristic, Manager as _, Peripheral as _, ScanFilter, ValueNotification,
+};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::stream::StreamExt;
 use std::collections::HashMap;
@@ -88,7 +90,7 @@ impl BluetoothCamera {
             }
 
             match self.find_camera().await {
-                Some(v) => {
+                Ok(v) => {
                     v.connect().await?;
                     self.device = Some(v);
 
@@ -103,7 +105,9 @@ impl BluetoothCamera {
                     let device = self.device.as_ref().unwrap();
 
                     // Seed the characteristics list.
-                    let char = device.discover_characteristics().await?;
+                    device.discover_services().await?;
+
+                    let char = device.characteristics();
 
                     let inc = char
                         .iter()
@@ -131,11 +135,13 @@ impl BluetoothCamera {
 
                     return Ok(());
                 }
-                None => {}
-            };
-
-            time::sleep(Duration::from_millis(50)).await;
+                Err(e) => {
+                    //dbg!(e);
+                }
+            }
         }
+
+        time::sleep(Duration::from_millis(50)).await;
 
         Err(BluetoothCameraError::ConnectError)
     }
@@ -229,19 +235,18 @@ impl BluetoothCamera {
         self.updates.subscribe()
     }
 
-    async fn find_camera(&self) -> Option<Peripheral> {
-        for p in self.adapter.peripherals().await.unwrap() {
+    async fn find_camera(&self) -> Result<Peripheral, BluetoothCameraError> {
+        for p in self.adapter.peripherals().await? {
             if p.properties()
-                .await
-                .unwrap()
-                .unwrap()
+                .await?
+                .ok_or(BluetoothCameraError::DiscoveryError)?
                 .local_name
                 .iter()
                 .any(|name| name.contains(&self.name))
             {
-                return Some(p);
+                return Ok(p);
             }
         }
-        None
+        Err(BluetoothCameraError::CameraNotFound(self.name.to_string()))
     }
 }

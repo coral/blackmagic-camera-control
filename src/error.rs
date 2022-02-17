@@ -15,6 +15,9 @@ pub enum BluetoothCameraError {
     #[error("No Bluetooth adapter detected.")]
     NoBluetooth,
 
+    #[error("Could not find camera: `{0}`")]
+    CameraNotFound(String),
+
     #[error(
         "Could not find the right characteristic. Make sure you connected to the right device."
     )]
@@ -28,6 +31,9 @@ pub enum BluetoothCameraError {
 
     #[error("Could not connect to the camera.")]
     ConnectError,
+
+    #[error("Discovery Error.")]
+    DiscoveryError,
 
     #[error(transparent)]
     BTLEError(#[from] btleplug::Error),

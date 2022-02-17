@@ -4,7 +4,7 @@ use std::error::Error;
 use std::time::Duration;
 use tokio::time;
 
-const CAMERA_NAME: &'static str = "A:4BE2529F";
+const CAMERA_NAME: &'static str = "1:4BE2529F";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
