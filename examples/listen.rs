@@ -1,5 +1,5 @@
 use blackmagic_camera_control::command::{Command, Metadata, Video};
-use blackmagic_camera_control::{BluetoothCamera, Operation};
+use blackmagic_camera_control::BluetoothCamera;
 use std::error::Error;
 use std::time::Duration;
 use tokio::time;

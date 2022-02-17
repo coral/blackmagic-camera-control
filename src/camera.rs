@@ -1,9 +1,7 @@
 use crate::command::Command;
 use crate::error::BluetoothCameraError;
 use crate::rawcommand::{Operation, RawCommand};
-use btleplug::api::{
-    Central, Characteristic, Manager as _, Peripheral as _, ScanFilter, ValueNotification,
-};
+use btleplug::api::{Central, Characteristic, Manager as _, Peripheral as _, ValueNotification};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::stream::StreamExt;
 use std::collections::HashMap;
@@ -15,6 +13,7 @@ use tokio::sync::RwLock;
 use tokio::time;
 use uuid::Uuid;
 
+pub const CAMERA_SERVICE: Uuid = Uuid::from_u128(54650678423016196498641639054569411539);
 pub const CAMERA_MANUFACTURER: Uuid = Uuid::from_u128(855109558092022082745622393992443);
 pub const CAMERA_MODEL: Uuid = Uuid::from_u128(854713417279450761057654674240763);
 pub const OUTGOING_CAMERA_CONTROL: Uuid = Uuid::from_u128(124715205548830368390231916378743955899);
@@ -79,7 +78,7 @@ impl BluetoothCamera {
         let now = time::Instant::now();
         self.adapter
             .start_scan(ScanFilter {
-                services: vec![OUTGOING_CAMERA_CONTROL],
+                services: vec![CAMERA_SERVICE],
             })
             .await?;
 
@@ -104,9 +103,7 @@ impl BluetoothCamera {
                     let device = self.device.as_ref().unwrap();
 
                     // Seed the characteristics list.
-                    device.discover_services().await?;
-
-                    let char = device.characteristics();
+                    let char = device.discover_characteristics().await?;
 
                     let inc = char
                         .iter()

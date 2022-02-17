@@ -15,13 +15,14 @@ name = "blackmagic_camera_control"
 path = "src/lib.rs"
 
 [dependencies]
-btleplug = "0.9.0"
+btleplug = "0.9.1"
 fixed = {version = "1.9.0", features = ["num-traits"]}
 futures = "0.3.16"
 num-traits = "0.2.14"
 thiserror = "1.0.26"
 tokio = { version = "1.10.0", features = ["full"] }
 uuid = { version = "0.8.2", features = ["serde", "v5"] }
+cec-rs = "2.2.1"
 
 
 [build-dependencies]
