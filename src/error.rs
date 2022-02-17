@@ -32,6 +32,9 @@ pub enum BluetoothCameraError {
     #[error("Could not connect to the camera.")]
     ConnectError,
 
+    #[error("Device Reference Error")]
+    DevRefError,
+
     #[error("Discovery Error.")]
     DiscoveryError,
 

@@ -102,7 +102,10 @@ impl BluetoothCamera {
 
                     time::sleep(Duration::from_millis(500)).await;
 
-                    let device = self.device.as_ref().unwrap();
+                    let device = self
+                        .device
+                        .as_ref()
+                        .ok_or(BluetoothCameraError::DevRefError)?;
 
                     // Seed the characteristics list.
                     device.discover_services().await?;
@@ -124,7 +127,13 @@ impl BluetoothCamera {
                     self.write_char = Some(ouc.to_owned());
 
                     // Subscribe to Incoming Camera Control
-                    device.subscribe(&self.read_char.as_ref().unwrap()).await?;
+                    device
+                        .subscribe(
+                            self.read_char
+                                .as_ref()
+                                .ok_or(BluetoothCameraError::DevRefError)?,
+                        )
+                        .await?;
                     let stream = device.notifications().await?;
 
                     let ble_cache = self.cache.clone();
@@ -150,7 +159,12 @@ impl BluetoothCamera {
     ///
     /// NOTE: THIS ACTUALLY DOESN'T WORK ON OSX BECAUSE THE UNDERLYING LIBRARY IS PEPEGA
     pub async fn disconnect(&mut self) -> Result<(), BluetoothCameraError> {
-        Ok(self.device.as_ref().unwrap().disconnect().await?)
+        Ok(self
+            .device
+            .as_ref()
+            .ok_or(BluetoothCameraError::DevRefError)?
+            .disconnect()
+            .await?)
     }
 
     pub async fn write(
