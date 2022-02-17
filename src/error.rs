@@ -38,6 +38,7 @@ pub enum BluetoothCameraError {
     #[error("Discovery Error.")]
     DiscoveryError,
 
+    #[cfg(feature = "ble")]
     #[error(transparent)]
     BTLEError(#[from] btleplug::Error),
 

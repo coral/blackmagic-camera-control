@@ -1,4 +1,8 @@
-pub mod camera;
+#[cfg(feature = "ble")]
+pub mod blecamera;
+#[cfg(feature = "ble")]
+pub use blecamera::BluetoothCamera;
+
 pub mod error;
 pub mod rawcommand;
 
@@ -7,5 +11,4 @@ pub mod command {
 }
 
 //Exports
-pub use camera::BluetoothCamera;
 pub use rawcommand::Operation;

@@ -145,9 +145,7 @@ impl BluetoothCamera {
 
                     return Ok(());
                 }
-                Err(e) => {
-                    //dbg!(e);
-                }
+                Err(_) => {}
             }
 
             time::sleep(Duration::from_millis(50)).await;
