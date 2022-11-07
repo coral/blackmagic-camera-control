@@ -250,7 +250,6 @@ impl BluetoothCamera {
 
     async fn find_camera(&self) -> Result<Peripheral, BluetoothCameraError> {
         for p in self.adapter.peripherals().await? {
-            dbg!(&p);
             if p.properties()
                 .await?
                 .ok_or(BluetoothCameraError::DiscoveryError)?
