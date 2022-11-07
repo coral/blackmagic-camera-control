@@ -1,6 +1,6 @@
 [package]
 name = "blackmagic-camera-control"
-version = "0.2.2-alpha.0"
+version = "0.2.2"
 authors = ["coral <jonas@jonasbengtson.se>"]
 edition = "2018"
 build = "build/main.rs"
