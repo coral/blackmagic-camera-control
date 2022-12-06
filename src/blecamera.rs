@@ -6,6 +6,7 @@ use btleplug::api::{
 };
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::stream::StreamExt;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -25,6 +26,7 @@ pub const CAMERA_STATUS: Uuid = Uuid::from_u128(17001870033286909906231660870758
 pub const DEVICE_NAME: Uuid = Uuid::from_u128(339846463932956345205123112215954503836);
 pub const PROTOCOL_VERSION: Uuid = Uuid::from_u128(190244785298557795456958317949635929862);
 
+#[derive(Debug)]
 #[allow(dead_code)]
 pub struct BluetoothCamera {
     name: String,
@@ -40,6 +42,12 @@ pub struct BluetoothCamera {
     updates: Sender<Command>,
     cache: Arc<RwLock<HashMap<String, Command>>>,
 }
+
+// impl std::fmt::Display for BluetoothCamera {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         todo!()
+//     }
+// }
 
 impl BluetoothCamera {
     /// Takes the BLE name of the camera and returns a new BluetoothCamera instance

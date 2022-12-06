@@ -3,7 +3,14 @@ use crate::protocol::{BlackmagicCameraProtocol, Parameter};
 use codegen::{Block, Scope};
 use convert_case::{Case, Casing};
 
-static DERIVE_TRAITS: [&str; 4] = ["Debug", "PartialEq", "Clone", "PartialOrd"];
+static DERIVE_TRAITS: [&str; 6] = [
+    "Debug",
+    "PartialEq",
+    "Clone",
+    "PartialOrd",
+    "Serialize",
+    "Deserialize",
+];
 
 pub struct Datagen {
     protocol: BlackmagicCameraProtocol,
@@ -30,6 +37,7 @@ impl Datagen {
             "{CommandError, RawCommand, ParamType, Parameter}",
         );
         s.import("std", "fmt");
+        s.import("serde", "{Serialize, Deserialize}");
     }
 
     fn commands(s: &mut Scope, protocol: &BlackmagicCameraProtocol) {
